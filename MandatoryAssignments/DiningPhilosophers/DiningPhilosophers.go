@@ -7,63 +7,54 @@ import (
 
 func main() {
 
-	ch11 := make(chan int)
-	ch12 := make(chan int)
-	ch22 := make(chan int)
-	ch23 := make(chan int)
-	ch33 := make(chan int)
-	ch34 := make(chan int)
-	ch44 := make(chan int)
-	ch45 := make(chan int)
-	ch55 := make(chan int)
-	ch51 := make(chan int)
+	ch1 := make(chan bool)
+	ch2 := make(chan bool)
+	ch3 := make(chan bool)
+	ch4 := make(chan bool)
+	ch5 := make(chan bool)
 
-	go fork(1, ch11, ch12)
-	go fork(2, ch22, ch23)
-	go fork(3, ch33, ch34)
-	go fork(4, ch44, ch45)
-	go fork(5, ch55, ch51)
+	go fork(ch1)
+	go fork(ch2)
+	go fork(ch3)
+	go fork(ch4)
+	go fork(ch5)
 
-	go eater(1, ch51, ch11)
-	go eater(2, ch12, ch22)
-	go eater(3, ch23, ch33)
-	go eater(4, ch34, ch44)
-	go eater(5, ch45, ch55)
+	go eater(1, ch5, ch1)
+	go eater(2, ch1, ch2)
+	go eater(3, ch2, ch3)
+	go eater(4, ch3, ch4)
+	go eater(5, ch4, ch5)
 
-	time.Sleep(10000 * time.Millisecond)
+	time.Sleep(100000000 * time.Millisecond)
 }
 
-func fork(number int, ch1, ch2 chan int) {
-	var x int = 1
-
-	if number%2 == 0 {
-		x = <-ch1
-	} else {
-		x = <-ch2
-	}
-
-	fmt.Println(x)
-
-	/*for i := 0; i < 1000000000; i++ {
-		ch1 <- 5
-		ch2 <- 10
-	}*/
+func fork(ch chan bool) {
+	ch <- true
 }
 
-func eater(number int, ch1, ch2 chan int) {
+func eater(number int, ch1, ch2 chan bool) {
 
 	var y int = 0
 
-	select {
-	case ch1 <- y:
+	for {
+
+		// Avoids deadlock
+		if number%2 == 0 {
+			<-ch1
+			<-ch2
+		} else {
+			<-ch2
+			<-ch1
+		}
+
 		y++
-	case ch2 <- y:
-		y++
-	default:
-		fmt.Println("eater ", number, " not consumed")
+
+		fmt.Printf("Philosopher no: %v, State: Eating, Count: %v\n", number, y)
+
+		ch1 <- true
+		ch2 <- true
+
+		fmt.Printf("Philosopher no: %v, State: Thinking\n", number)
 	}
 
-	if y == 1 {
-		fmt.Println("Eater ", number, "Channel 1")
-	}
 }
