@@ -1,0 +1,27 @@
+a) What are packages in your implementation? What data structure do you use to transmit data and meta-data?
+
+-Packages are represented by the struct "Message", that contains sequence, ancknowledgement, message and checksum.
+The message part of the struct contains the package data, while the other members of the struck are metadeta
+
+b) Does your implementation use threads or processes? Why is it not realistic to use threads?
+
+-The implementation uses threads. By using threads, we don't have any real network communication. Errors cannot occour
+without simulating errors. The threads are communicating with eachother on the same machine, and are thus not able to
+experience network induced errors.
+
+c) In case the network changes the order in which messages are delivered, how would you handle message re-ordering?
+
+-By using the sequence from the client, the server knows where in the sequence each message belongs. The sequence can
+be used to order the packages. In practice, this can be done by subtracting the initial handshake sequence from an
+arbitrary message, thus deriving an array index, and store it in the array at the calculated index. This will order will
+order the packages correctly. If an array index is empty, a package is missing. Also, if the checksum is incorrect,
+a package is missing, or the ordering is incorrect.
+
+e) Why is the 3-way handshake important?
+
+-The 3-way handshake provides both the client and server with the initial conditions for data transfer.
+The client provides the server with a way to check the ordering and completeness of the data transmission, by sending a
+sequence number, and the server can acknowledge to the client, whether or not it has established a connection and
+ whether or not it has received the complete data.
+ In summary: The 3-way handshake enables client and server to send and receive packages in an orderly fashion, where
+ package ordering and completeness is ensured.
