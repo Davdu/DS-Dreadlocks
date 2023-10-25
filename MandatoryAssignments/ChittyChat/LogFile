@@ -1,0 +1,48 @@
+2023/10/25 12:46:49 Client Casper, Outgoing  - Username:"Casper"  Message:"Client Casper joined Chitty-Chat"  Timestamp:2
+2023/10/25 12:46:49 Server, Outgoing  -  Username:"Casper"  Message:"Client Casper joined Chitty-Chat"  Timestamp:3
+2023/10/25 12:46:49 Client Casper, Incoming  - Casper: Client Casper joined Chitty-Chat at Lamport time 3
+2023/10/25 12:46:51 Client Mads, Outgoing  - Username:"Mads"  Message:"Client Mads joined Chitty-Chat"  Timestamp:2
+2023/10/25 12:46:51 Server, Outgoing  -  Username:"Mads"  Message:"Client Mads joined Chitty-Chat"  Timestamp:4
+2023/10/25 12:46:51 Client Casper, Incoming  - Mads: Client Mads joined Chitty-Chat at Lamport time 4
+2023/10/25 12:46:51 Client Mads, Incoming  - Mads: Client Mads joined Chitty-Chat at Lamport time 4
+2023/10/25 12:46:53 Client Mads, Outgoing  - Username:"Mads"  Message:"Hej Casper"  Timestamp:6
+2023/10/25 12:46:53 Server, Outgoing  -  Username:"Mads"  Message:"Hej Casper"  Timestamp:7
+2023/10/25 12:46:53 Client Mads, Incoming  - Mads: Hej Casper at Lamport time 7
+2023/10/25 12:46:53 Client Casper, Incoming  - Mads: Hej Casper at Lamport time 7
+2023/10/25 12:46:57 Client Oliver, Outgoing  - Username:"Oliver"  Message:"Client Oliver joined Chitty-Chat"  Timestamp:2
+2023/10/25 12:46:57 Server, Outgoing  -  Username:"Oliver"  Message:"Client Oliver joined Chitty-Chat"  Timestamp:8
+2023/10/25 12:46:57 Client Casper, Incoming  - Oliver: Client Oliver joined Chitty-Chat at Lamport time 8
+2023/10/25 12:46:57 Client Mads, Incoming  - Oliver: Client Oliver joined Chitty-Chat at Lamport time 8
+2023/10/25 12:46:57 Client Oliver, Incoming  - Oliver: Client Oliver joined Chitty-Chat at Lamport time 8
+2023/10/25 12:46:59 Client Oliver, Outgoing  - Username:"Oliver"  Message:"Hej Gutter"  Timestamp:10
+2023/10/25 12:46:59 Server, Outgoing  -  Username:"Oliver"  Message:"Hej Gutter"  Timestamp:11
+2023/10/25 12:46:59 Client Oliver, Incoming  - Oliver: Hej Gutter at Lamport time 11
+2023/10/25 12:46:59 Client Mads, Incoming  - Oliver: Hej Gutter at Lamport time 11
+2023/10/25 12:46:59 Client Casper, Incoming  - Oliver: Hej Gutter at Lamport time 11
+2023/10/25 12:47:05 Client Casper, Outgoing  - Username:"Casper"  Message:"Hej Skal smutte!"  Timestamp:13
+2023/10/25 12:47:05 Server, Outgoing  -  Username:"Casper"  Message:"Hej Skal smutte!"  Timestamp:14
+2023/10/25 12:47:05 Client Casper, Incoming  - Casper: Hej Skal smutte! at Lamport time 14
+2023/10/25 12:47:05 Client Mads, Incoming  - Casper: Hej Skal smutte! at Lamport time 14
+2023/10/25 12:47:05 Client Oliver, Incoming  - Casper: Hej Skal smutte! at Lamport time 14
+2023/10/25 12:47:06 Client Casper, Outgoing  - Username:"Casper"  Timestamp:16
+2023/10/25 12:47:06 Server, Outgoing  -  Username:"Casper"  Timestamp:17
+2023/10/25 12:47:06 Client Oliver, Incoming  - Casper:  at Lamport time 17
+2023/10/25 12:47:06 Client Mads, Incoming  - Casper:  at Lamport time 17
+2023/10/25 12:47:06 Server  -  Username:"Server"  Message:"Casper left Chitty-Chat"  Timestamp:18
+2023/10/25 12:47:06 Server, Outgoing  -  Username:"Server"  Message:"Casper left Chitty-Chat"  Timestamp:18
+2023/10/25 12:47:06 Client Oliver, Incoming  - Server: Casper left Chitty-Chat at Lamport time 18
+2023/10/25 12:47:06 Client Mads, Incoming  - Server: Casper left Chitty-Chat at Lamport time 18
+2023/10/25 12:49:17 Client Casper, Outgoing  - Username:"Casper"  Message:"Client Casper joined Chitty-Chat"  Timestamp:2
+2023/10/25 12:49:17 Server, Outgoing  -  Username:"Casper"  Message:"Client Casper joined Chitty-Chat"  Timestamp:19
+2023/10/25 12:49:17 Client Mads, Incoming  - Casper: Client Casper joined Chitty-Chat at Lamport time 19
+2023/10/25 12:49:17 Client Oliver, Incoming  - Casper: Client Casper joined Chitty-Chat at Lamport time 19
+2023/10/25 12:49:17 Client Casper, Incoming  - Casper: Client Casper joined Chitty-Chat at Lamport time 19
+2023/10/25 14:10:36 Server  -  Username:"Server"  Message:"Casper left Chitty-Chat"  Timestamp:20
+2023/10/25 14:10:36 Server, Outgoing  -  Username:"Server"  Message:"Casper left Chitty-Chat"  Timestamp:20
+2023/10/25 14:10:36 Client Mads, Incoming  - Server: Casper left Chitty-Chat at Lamport time 20
+2023/10/25 14:10:36 Client Oliver, Incoming  - Server: Casper left Chitty-Chat at Lamport time 20
+2023/10/25 14:10:37 Server  -  Username:"Server"  Message:"Oliver left Chitty-Chat"  Timestamp:21
+2023/10/25 14:10:37 Server, Outgoing  -  Username:"Server"  Message:"Oliver left Chitty-Chat"  Timestamp:21
+2023/10/25 14:10:37 Client Mads, Incoming  - Server: Oliver left Chitty-Chat at Lamport time 21
+2023/10/25 14:10:38 Server  -  Username:"Server"  Message:"Mads left Chitty-Chat"  Timestamp:22
+2023/10/25 14:10:38 Server, Outgoing  -  Username:"Server"  Message:"Mads left Chitty-Chat"  Timestamp:22

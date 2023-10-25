@@ -1,5 +1,9 @@
 syntax = "proto3";
 
+package chittychat;
+
+option go_package = "./";
+
 service ChittyChat {
   rpc Messages(stream Message) returns (stream Message);
 }
