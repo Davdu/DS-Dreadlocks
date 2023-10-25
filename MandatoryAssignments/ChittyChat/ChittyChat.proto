@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+service ChittyChat {
+  rpc Messages(stream Message) returns (stream Message);
+}
+
+message Message {
+  string Username = 1;
+  string Message = 2;
+  int32 Timestamp = 3;
+}
