@@ -7,9 +7,6 @@ import (
 
 func main() {
 
-	// runs the program for x seconds
-	var x time.Duration = 5
-
 	ch1 := make(chan bool)
 	ch2 := make(chan bool)
 	ch3 := make(chan bool)
@@ -34,7 +31,7 @@ func main() {
 	go eater2(4, ch3, ch4, toFork3, toFork4)
 	go eater2(5, ch4, ch5, toFork4, toFork5)
 
-	time.Sleep(x * 1000 * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 }
 
 func fork2(ch, toFork chan bool) {
