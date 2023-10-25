@@ -86,6 +86,7 @@ func receiveMessage(stream chittychat.ChittyChat_MessagesClient) {
 		}
 		lamportTime = max(lamportTime, incoming.Timestamp) + 1
 		log.Printf("Client %s, Incoming  - %s: %s at Lamport time %d", username, incoming.Username, incoming.Message, incoming.Timestamp)
+		fmt.Printf("%s: %s\n", incoming.Username, incoming.Message)
 	}
 }
 
