@@ -108,7 +108,7 @@ func validateMessage(msg string) (err error) {
 	}
 
 	if !utf8.ValidString(msg) {
-		err = errors.New("message is too long. Keep it within 128 characters long")
+		err = errors.New("message does not use UTF-8 encoding")
 		return
 	}
 
