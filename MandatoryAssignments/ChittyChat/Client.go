@@ -29,22 +29,27 @@ func main() {
 	defer f.Close()
 	log.SetOutput(f)
 
+	// Connect to port
 	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
 
+	// Generate new client and initialize stream
 	client := chittychat.NewChittyChatClient(conn)
 	stream, err := client.Messages(context.Background())
 	if err != nil {
 		log.Fatalf("error while creating stream: %v", err)
 	}
 
+	// Send join message
 	sendMessage(fmt.Sprintf("Client %s joined Chitty-Chat", username), stream)
 
+	// Recieve messages on a different thread to not interfere with sending of messages.
 	go receiveMessage(stream)
 
+	// Infinite loop to detect newly written messages
 	reader := bufio.NewReader(os.Stdin)
 	for {
 		text, _ := reader.ReadString('\n')
@@ -57,9 +62,12 @@ func incrementLamport() {
 }
 
 func sendMessage(message string, stream chittychat.ChittyChat_MessagesClient) {
+
+	// Validates messages and prints and logs the given error message.
 	err := validateMessage(message)
 	if err != nil {
 		fmt.Printf("%s\n", err)
+		log.Printf("Invalid Message! - %s: %s\n", username, err)
 		return
 	}
 
@@ -84,8 +92,10 @@ func receiveMessage(stream chittychat.ChittyChat_MessagesClient) {
 			log.Fatalf("Failed to receive a message: %v", err)
 			return
 		}
-		lamportTime = max(lamportTime, incoming.Timestamp) + 1
-		log.Printf("Client %s, Incoming  - %s: %s at Lamport time %d", username, incoming.Username, incoming.Message, incoming.Timestamp)
+		lamportTime = max(lamportTime, incoming.Timestamp)
+		incrementLamport()
+
+		log.Printf("Client %s, Incoming  - Username:\"%s\" Message:\"%s\" Timestamp:\"%d\"", username, incoming.Username, incoming.Message, lamportTime)
 		fmt.Printf("%s: %s\n", incoming.Username, incoming.Message)
 	}
 }

@@ -16,11 +16,13 @@ type server struct {
 	lamportClock int32
 }
 
+// Updates the stored lamport time based.
 func (s *server) updateAndIncrementLamport(receivedTimestamp int32) int32 {
 	s.lamportClock = max(s.lamportClock, receivedTimestamp) + 1
 	return s.lamportClock
 }
 
+// Compares and returns the largest int32.
 func max(a, b int32) int32 {
 	if a > b {
 		return a
@@ -33,15 +35,16 @@ func (s *server) Messages(stream chittychat.ChittyChat_MessagesServer) error {
 
 	// infinite loop
 	for {
+		//Constantly recieves messages on streams and broadcasts them immediately
+		// If a stream is met with an exception, Clients are removed
 		incoming, err := stream.Recv()
 		if err != nil {
 			s.removeClientAndNotify(stream)
 			return err
 		}
-
 		incoming.Timestamp = s.updateAndIncrementLamport(incoming.Timestamp)
+		log.Printf("Server, Incoming  -  %s", incoming)
 		s.usernames[stream] = incoming.Username
-
 		s.broadcastMessage(incoming)
 	}
 }
@@ -50,10 +53,12 @@ func (s *server) removeClientAndNotify(targetStream chittychat.ChittyChat_Messag
 
 	s.updateAndIncrementLamport(s.lamportClock)
 
+	// Loops through all registered clients and find the one matching the stream, which previously met an error
 	for i, client := range s.clients {
 		if client == targetStream {
 			s.clients = append(s.clients[:i], s.clients[i+1:]...)
 
+			// Generate the standard message for client disconnection.
 			username := s.usernames[client]
 			disconnectMsg := &chittychat.Message{
 				Username:  "Server",
@@ -61,8 +66,7 @@ func (s *server) removeClientAndNotify(targetStream chittychat.ChittyChat_Messag
 				Timestamp: s.lamportClock,
 			}
 
-			log.Printf("Server  -  %s", disconnectMsg)
-
+			log.Printf("Server, Disconnection  -  %s", disconnectMsg)
 			s.broadcastMessage(disconnectMsg)
 			break
 		}
@@ -71,13 +75,15 @@ func (s *server) removeClientAndNotify(targetStream chittychat.ChittyChat_Messag
 
 func (s *server) broadcastMessage(msg *chittychat.Message) {
 
+	msg.Timestamp = s.updateAndIncrementLamport(msg.Timestamp)
 	log.Printf("Server, Outgoing  -  %s", msg)
-
+	// Loops through all clients and sends the given message.
 	for _, client := range s.clients {
 		if err := client.Send(msg); err != nil {
 			log.Printf("Failed to broadcast message: %v", err)
 		}
 	}
+
 }
 
 func main() {
@@ -90,7 +96,10 @@ func main() {
 	defer f.Close()
 	log.SetOutput(f)
 
+	// Setup port
 	lis, _ := net.Listen("tcp", ":50051")
+
+	// Generate new server
 	grpcServer := grpc.NewServer()
 
 	service := &server{

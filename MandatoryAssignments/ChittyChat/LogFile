@@ -1,0 +1,67 @@
+2023/10/27 11:23:57 Client Mads, Outgoing  - Username:"Mads" Message:"Client Mads joined Chitty-Chat" Timestamp:2
+2023/10/27 11:23:57 Server, Incoming  -  Username:"Mads" Message:"Client Mads joined Chitty-Chat" Timestamp:3
+2023/10/27 11:23:57 Server, Outgoing  -  Username:"Mads" Message:"Client Mads joined Chitty-Chat" Timestamp:4
+2023/10/27 11:23:57 Client Mads, Incoming  - Username:"Mads" Message:"Client Mads joined Chitty-Chat" Timestamp:"5"
+
+2023/10/27 11:25:19 Client Casper, Outgoing  - Username:"Casper" Message:"Client Casper joined Chitty-Chat" Timestamp:2
+2023/10/27 11:25:19 Server, Incoming  -  Username:"Casper" Message:"Client Casper joined Chitty-Chat" Timestamp:5
+2023/10/27 11:25:19 Server, Outgoing  -  Username:"Casper" Message:"Client Casper joined Chitty-Chat" Timestamp:6
+2023/10/27 11:25:19 Client Mads, Incoming  - Username:"Casper" Message:"Client Casper joined Chitty-Chat" Timestamp:"7"
+2023/10/27 11:25:19 Client Casper, Incoming  - Username:"Casper" Message:"Client Casper joined Chitty-Chat" Timestamp:"7"
+
+2023/10/27 11:25:24 Client Oliver, Outgoing  - Username:"Oliver" Message:"Client Oliver joined Chitty-Chat" Timestamp:2
+2023/10/27 11:25:24 Server, Incoming  -  Username:"Oliver" Message:"Client Oliver joined Chitty-Chat" Timestamp:7
+2023/10/27 11:25:24 Server, Outgoing  -  Username:"Oliver" Message:"Client Oliver joined Chitty-Chat" Timestamp:8
+2023/10/27 11:25:24 Client Mads, Incoming  - Username:"Oliver" Message:"Client Oliver joined Chitty-Chat" Timestamp:"9"
+2023/10/27 11:25:24 Client Casper, Incoming  - Username:"Oliver" Message:"Client Oliver joined Chitty-Chat" Timestamp:"9"
+2023/10/27 11:25:24 Client Oliver, Incoming  - Username:"Oliver" Message:"Client Oliver joined Chitty-Chat" Timestamp:"9"
+
+2023/10/27 11:25:37 Client Mads, Outgoing  - Username:"Mads" Message:"Hello folks" Timestamp:10
+2023/10/27 11:25:37 Server, Incoming  -  Username:"Mads" Message:"Hello folks" Timestamp:11
+2023/10/27 11:25:37 Server, Outgoing  -  Username:"Mads" Message:"Hello folks" Timestamp:12
+2023/10/27 11:25:37 Client Oliver, Incoming  - Username:"Mads" Message:"Hello folks" Timestamp:"13"
+2023/10/27 11:25:37 Client Mads, Incoming  - Username:"Mads" Message:"Hello folks" Timestamp:"13"
+2023/10/27 11:25:37 Client Casper, Incoming  - Username:"Mads" Message:"Hello folks" Timestamp:"13"
+
+2023/10/27 11:25:47 Client Mads, Outgoing  - Username:"Mads" Timestamp:14
+2023/10/27 11:25:47 Server, Incoming  -  Username:"Mads" Timestamp:15
+2023/10/27 11:25:47 Server, Outgoing  -  Username:"Mads" Timestamp:16
+2023/10/27 11:25:47 Client Oliver, Incoming  - Username:"Mads" Message:"" Timestamp:"17"
+2023/10/27 11:25:47 Client Casper, Incoming  - Username:"Mads" Message:"" Timestamp:"17"
+
+2023/10/27 11:25:47 Server, Disconnection  -  Username:"Server" Message:"Mads left Chitty-Chat" Timestamp:17
+2023/10/27 11:25:47 Server, Outgoing  -  Username:"Server" Message:"Mads left Chitty-Chat" Timestamp:18
+2023/10/27 11:25:47 Client Casper, Incoming  - Username:"Server" Message:"Mads left Chitty-Chat" Timestamp:"19"
+2023/10/27 11:25:47 Client Oliver, Incoming  - Username:"Server" Message:"Mads left Chitty-Chat" Timestamp:"19"
+
+2023/10/27 11:25:58 Client Mads, Outgoing  - Username:"Mads" Message:"Client Mads joined Chitty-Chat" Timestamp:2
+2023/10/27 11:25:58 Server, Incoming  -  Username:"Mads" Message:"Client Mads joined Chitty-Chat" Timestamp:19
+2023/10/27 11:25:58 Server, Outgoing  -  Username:"Mads" Message:"Client Mads joined Chitty-Chat" Timestamp:20
+2023/10/27 11:25:58 Client Casper, Incoming  - Username:"Mads" Message:"Client Mads joined Chitty-Chat" Timestamp:"21"
+2023/10/27 11:25:58 Client Oliver, Incoming  - Username:"Mads" Message:"Client Mads joined Chitty-Chat" Timestamp:"21"
+2023/10/27 11:25:58 Client Mads, Incoming  - Username:"Mads" Message:"Client Mads joined Chitty-Chat" Timestamp:"21"
+
+2023/10/27 11:26:03 Client Mads, Outgoing  - Username:"Mads" Message:"Hello again" Timestamp:22
+2023/10/27 11:26:03 Server, Incoming  -  Username:"Mads" Message:"Hello again" Timestamp:23
+2023/10/27 11:26:03 Server, Outgoing  -  Username:"Mads" Message:"Hello again" Timestamp:24
+2023/10/27 11:26:03 Client Mads, Incoming  - Username:"Mads" Message:"Hello again" Timestamp:"25"
+2023/10/27 11:26:03 Client Oliver, Incoming  - Username:"Mads" Message:"Hello again" Timestamp:"25"
+2023/10/27 11:26:03 Client Casper, Incoming  - Username:"Mads" Message:"Hello again" Timestamp:"25"
+
+2023/10/27 11:26:16 Client Mads, Outgoing  - Username:"Mads" Timestamp:26               // UNINTENDED MESSAGE. LIKELY TERMINAL AND RACE CONDITION AT FAULT
+
+2023/10/27 11:26:16 Server, Disconnection  -  Username:"Server" Message:"Mads left Chitty-Chat" Timestamp:25
+2023/10/27 11:26:16 Server, Outgoing  -  Username:"Server" Message:"Mads left Chitty-Chat" Timestamp:26
+2023/10/27 11:26:16 Client Oliver, Incoming  - Username:"Server" Message:"Mads left Chitty-Chat" Timestamp:"27"
+2023/10/27 11:26:16 Client Casper, Incoming  - Username:"Server" Message:"Mads left Chitty-Chat" Timestamp:"27"
+
+2023/10/27 11:26:17 Server, Disconnection  -  Username:"Server" Message:"Casper left Chitty-Chat" Timestamp:27
+2023/10/27 11:26:17 Server, Outgoing  -  Username:"Server" Message:"Casper left Chitty-Chat" Timestamp:28
+2023/10/27 11:26:17 Client Oliver, Incoming  - Username:"Server" Message:"Casper left Chitty-Chat" Timestamp:"29"
+
+2023/10/27 11:26:22 Client Oliver, Outgoing  - Username:"Oliver" Timestamp:30           // UNINTENDED MESSAGE. LIKELY TERMINAL AND RACE CONDITION AT FAULT
+2023/10/27 11:26:22 Server, Incoming  -  Username:"Oliver" Timestamp:31                 // UNINTENDED MESSAGE. LIKELY TERMINAL AND RACE CONDITION AT FAULT
+2023/10/27 11:26:22 Server, Outgoing  -  Username:"Oliver" Timestamp:32                 // UNINTENDED MESSAGE. LIKELY TERMINAL AND RACE CONDITION AT FAULT
+
+2023/10/27 11:26:22 Server, Disconnection  -  Username:"Server" Message:"Oliver left Chitty-Chat" Timestamp:33
+2023/10/27 11:26:22 Server, Outgoing  -  Username:"Server" Message:"Oliver left Chitty-Chat" Timestamp:34
