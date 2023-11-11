@@ -31,6 +31,7 @@ func max(a, b int32) int32 {
 }
 
 func (s *server) Messages(stream chittychat.ChittyChat_MessagesServer) error {
+
 	s.clients = append(s.clients, stream)
 
 	// infinite loop
@@ -42,7 +43,9 @@ func (s *server) Messages(stream chittychat.ChittyChat_MessagesServer) error {
 			s.removeClientAndNotify(stream)
 			return err
 		}
+
 		incoming.Timestamp = s.updateAndIncrementLamport(incoming.Timestamp)
+		incoming.Message = "Client "
 		log.Printf("Server, Incoming  -  %s", incoming)
 		s.usernames[stream] = incoming.Username
 		s.broadcastMessage(incoming)
