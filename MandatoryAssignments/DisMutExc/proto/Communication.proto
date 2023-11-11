@@ -3,16 +3,13 @@ syntax = "proto3";
 package proto;
 option go_package="./";
 
-service DisMutExc {
+service Node {
   rpc Messages(stream Message) returns (stream Message);
 }
 
 message Message {
-
-}
-
-message ElectionCall {
-  int32 Vote = 1;
-  
+  int32 Id = 1;
+  string State = 2;
+  int32 Lamport = 3;
 }
 
