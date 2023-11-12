@@ -2,6 +2,7 @@ package main
 
 import (
 	nd "DisMutExc/node"
+	"bufio"
 	"context"
 	"fmt"
 	"google.golang.org/grpc"
@@ -34,6 +35,8 @@ func main() {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
+
+	//
 
 	initializeClient(conn)
 }
@@ -90,14 +93,14 @@ func (node *node) Messages(stream nd.Node_MessagesClient) error {
 				incoming.State == "WANTED" &&
 					node.LamportTimeAtReq < incoming.Lamport-1 {
 
-				queue(incoming)
+				queue()
 
 			} else {
 
 			}
 		}
 
-		incoming.Lamport = node.updateAndIncrementLamport(incoming.Timestamp)
+		incoming.Lamport = node.updateAndIncrementLamport(incoming.Lamport)
 		//node.broadcastMessage(incoming)
 	}
 }
@@ -120,4 +123,27 @@ func max(a, b int32) int32 {
 		return a
 	}
 	return b
+}
+
+func (node *node) updateAndIncrementLamport(receivedTimestamp int32) int32 {
+	node.LamportTime = max(node.LamportTime, receivedTimestamp) + 1
+	return node.LamportTime
+}
+
+// Read/Write methods hardcoded
+
+func write(s string, node *node) {
+	data, err := os.OpenFile("DataFile", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0664)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+	defer data.Close()
+
+	w := bufio.NewWriter(data)
+	_, err = w.WriteString("Hello World")
+	if err != nil {
+		return
+	}
+
+	log.Printf("Peer %v wrote to data: \"%v\" at Lamport time %v.\n", node.ID, s, node.LamportTime)
 }
