@@ -1,1 +1,18 @@
 2023/11/12 20:39:15 Failed to listen: listen tcp: lookup tcp/%!d(string=5001): getaddrinfow: The specified class was not found.
+2023/11/13 12:52:13 Failed to listen: listen tcp: lookup tcp/%!d(string=썐): getaddrinfow: The specified class was not found.
+2023/11/13 12:52:15 Failed to listen: listen tcp: lookup tcp/%!d(string=썑): getaddrinfow: The specified class was not found.
+2023/11/13 12:52:16 Failed to listen: listen tcp: lookup tcp/%!d(string=썒): getaddrinfow: The specified class was not found.
+2023/11/13 12:52:39 Failed to listen: listen tcp: lookup tcp/%!d(string=썐): getaddrinfow: The specified class was not found.
+2023/11/13 12:53:01 Failed to listen: listen tcp: lookup tcp/%!d(string=썐): getaddrinfow: The specified class was not found.
+2023/11/13 12:53:27 Failed to listen: listen tcp: lookup tcp/%!d(string=썐): getaddrinfow: The specified class was not found.
+2023/11/13 12:54:26 Failed to listen: listen tcp: lookup tcp/%!d(string=썐): getaddrinfow: The specified class was not found.
+2023/11/13 12:55:02 Failed to listen: listen tcp: lookup tcp/%!d(string=썐): getaddrinfow: The specified class was not found.
+2023/11/13 12:55:35 Failed to listen: listen tcp: lookup tcp/%!d(string=썐): getaddrinfow: The specified class was not found.
+2023/11/13 12:56:12 Failed to listen: listen tcp: lookup tcp/%!d(string=썐): getaddrinfow: The specified class was not found.
+2023/11/13 12:56:54 Failed to listen: listen tcp: lookup tcp/%!d(string=썐): getaddrinfow: The specified class was not found.
+2023/11/13 12:57:11 Failed to listen: listen tcp: lookup tcp/%!d(string=썐): getaddrinfow: The specified class was not found.
+2023/11/13 12:59:14 Failed to listen: listen tcp: lookup tcp/%!d(string=썐): getaddrinfow: The specified class was not found.
+2023/11/13 13:00:54 Failed to listen: listen tcp: lookup tcp/%!d(string=썐): getaddrinfow: The specified class was not found.
+2023/11/13 13:01:20 Failed to listen: listen tcp: lookup tcp/%!d(string=썐): getaddrinfow: The specified class was not found.
+2023/11/13 13:02:57 Failed to listen: listen tcp: lookup tcp/%!d(string=50000): getaddrinfow: The specified class was not found.
+2023/11/13 13:03:07 Invalid input for Node ID: strconv.ParseInt: parsing "0 yes": invalid syntax

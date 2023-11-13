@@ -45,25 +45,16 @@ func main() {
 	defer f.Close()
 	log.SetOutput(f)
 
+	fmt.Println("Please enter the Node ID")
 	var nodeID int32
-	_, err = fmt.Scanln(&nodeID)
-
-	var nodePort string
-	_, err = fmt.Scanln(&nodePort)
-
-	// Connect to port
-	conn, err := grpc.Dial("localhost:"+nodePort, grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
-	}
-	defer conn.Close()
+	_, err = fmt.Scan(&nodeID)
 
 	node := &node{
 		ID:               nodeID,
 		LamportTime:      1,
 		LamportTimeAtReq: 1,
 		State:            "RELEASED",
-		Port:             nodePort,
+		Port:             string(50000 + nodeID),
 		Peers:            []nd.Node_MessagesClient{},
 		PeerIds:          make(map[int32]nd.Node_MessagesClient),
 	}
@@ -71,10 +62,18 @@ func main() {
 	// Start the server in a separate goroutine
 	go startGRPCServer(node)
 
+	establishConnections := false
+
+	for !establishConnections {
+		fmt.Println("Are you ready to establish connection to ALL other nodes?")
+		_, err = fmt.Scan(&establishConnections)
+	}
+
 	// Establish connections to other nodes
 	// You'll need to determine how to get the addresses of other nodes
 	connectToOtherNodes(node)
 
+	node.requestCriticalSection()
 }
 
 func startGRPCServer(node *node) {
@@ -91,28 +90,27 @@ func startGRPCServer(node *node) {
 }
 
 func connectToOtherNodes(node *node) {
-
-	var nodeOne int32
-	_, err1 = fmt.Scanln(&nodeOne)
-	var nodeTwo int32
-	_, err2 = fmt.Scanln(&nodeTwo)
-	var nodeThree int32
-	_, err3 = fmt.Scanln(&nodeThree)
-
-	// Connect to other nodes
-		openConnection(nodeOne,)
+	for i := 0; i < 3; i++ {
+		if !(node.ID == int32(i)) {
+			openConnection(int32(i), node)
+		}
 	}
 }
 
-func openConnection(id int, address string, node* node) {
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
+func openConnection(id int32, node *node) {
+
+	var port = 50000 + id
+
+	conn, err := grpc.Dial(string(port), grpc.WithInsecure())
 	if err != nil {
-		log.Printf("Failed to connect to node at %s: %v", address, err)
+		log.Printf(`Failed to connect to node at %s: %v`, port, err)
 	}
 	client := nd.NewNodeClient(conn)
 	stream, err := client.Messages(context.Background())
 	node.PeerIds[int32(id)] = stream
 	node.Peers = append(node.Peers, stream)
+
+	fmt.Println("Connected to port ", port)
 }
 
 func queue() {
@@ -208,6 +206,7 @@ func (node *node) broadcastMessage(msg *nd.Message) {
 }
 
 func (n *node) requestCriticalSection() {
+
 	n.State = "WANTED"
 	n.requestingCriticalSection = true
 	n.repliesReceived = make(map[int32]bool)
