@@ -9,6 +9,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"time"
 )
 
 type node struct {
@@ -46,15 +47,15 @@ func main() {
 	log.SetOutput(f)
 
 	fmt.Println("Please enter the Node ID")
-	var nodeID int32
+	var nodeID int
 	_, err = fmt.Scan(&nodeID)
 
 	node := &node{
-		ID:               nodeID,
+		ID:               int32(nodeID),
 		LamportTime:      1,
 		LamportTimeAtReq: 1,
 		State:            "RELEASED",
-		Port:             string(50000 + nodeID),
+		Port:             fmt.Sprintf("localhost:%d", 50000+nodeID),
 		Peers:            []nd.Node_MessagesClient{},
 		PeerIds:          make(map[int32]nd.Node_MessagesClient),
 	}
@@ -62,22 +63,20 @@ func main() {
 	// Start the server in a separate goroutine
 	go startGRPCServer(node)
 
-	establishConnections := false
+	time.Sleep(10 * time.Second) // Establish connections to other nodes
 
-	for !establishConnections {
-		fmt.Println("Are you ready to establish connection to ALL other nodes?")
-		_, err = fmt.Scan(&establishConnections)
-	}
-
-	// Establish connections to other nodes
 	// You'll need to determine how to get the addresses of other nodes
 	connectToOtherNodes(node)
 
-	node.requestCriticalSection()
+	time.Sleep(5 * time.Second)
+
+	go node.requestCriticalSection()
+
+	time.Sleep(200000 * time.Second)
 }
 
 func startGRPCServer(node *node) {
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", node.Port))
+	lis, err := net.Listen("tcp", node.Port)
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
@@ -87,6 +86,8 @@ func startGRPCServer(node *node) {
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
 	}
+
+	log.Println("Peer: ", node.ID, " Started server")
 }
 
 func connectToOtherNodes(node *node) {
@@ -98,23 +99,23 @@ func connectToOtherNodes(node *node) {
 }
 
 func openConnection(id int32, node *node) {
-
-	var port = 50000 + id
-
-	conn, err := grpc.Dial(string(port), grpc.WithInsecure())
+	var port = fmt.Sprintf("localhost:%d", 50000+id)
+	conn, err := grpc.Dial(port, grpc.WithInsecure())
 	if err != nil {
-		log.Printf(`Failed to connect to node at %s: %v`, port, err)
+		log.Printf(`Peer: %v: Failed to connect to node at %s: %v`, node.ID, port, err)
+		return // Don't proceed if there's an error
 	}
+
 	client := nd.NewNodeClient(conn)
 	stream, err := client.Messages(context.Background())
+	if err != nil {
+		log.Printf(`Peer: %v: Failed to create stream with node at %s: %v`, node.ID, port, err)
+		return // Don't proceed if there's an error
+	}
+
 	node.PeerIds[int32(id)] = stream
 	node.Peers = append(node.Peers, stream)
-
-	fmt.Println("Connected to port ", port)
-}
-
-func queue() {
-
+	log.Println("Peer: ", node.ID, " Connected to port ", port)
 }
 
 func (node *node) reply(peerID int32) {
@@ -144,14 +145,17 @@ func (n *node) Messages(stream nd.Node_MessagesServer) error {
 			return err
 		}
 
-		n.LamportTime = max(n.LamportTime, incoming.Lamport) + 1
+		n.updateAndIncrementLamport(incoming.Lamport)
+
+		log.Println("Peer: ", n.ID, " Recieved Message from client:", incoming.Id, " ", incoming.State, " at Lamport time: ", n.LamportTime)
 
 		switch incoming.State {
 		case "WANTED":
 			n.handleRequest(incoming)
 		case "REPLY":
 			n.repliesReceived[incoming.Id] = true
-			if n.canEnterCriticalSection() {
+			if n.canEnterCriticalSection() && n.requestingCriticalSection {
+				n.requestingCriticalSection = false
 				n.enterCriticalSection()
 			}
 		}
@@ -160,11 +164,13 @@ func (n *node) Messages(stream nd.Node_MessagesServer) error {
 
 func (n *node) handleRequest(incoming *nd.Message) {
 	if n.State == "HELD" || (n.State == "WANTED" && n.isRequestPrior(incoming)) {
+		n.updateAndIncrementLamport(n.LamportTime)
 		n.requestQueue = append(n.requestQueue, &Request{
 			PeerID:  incoming.Id,
 			Lamport: incoming.Lamport,
 		})
 	} else {
+		n.updateAndIncrementLamport(n.LamportTime)
 		n.reply(incoming.Id)
 	}
 }
@@ -183,29 +189,29 @@ func (n *node) canEnterCriticalSection() bool {
 }
 
 func (n *node) enterCriticalSection() {
+
+	n.updateAndIncrementLamport(n.LamportTime)
+
+	log.Printf("Peer: %v: Entering critical section at Lamport time %v", n.ID, n.LamportTime)
+
 	n.State = "HELD"
 	write(n)
 	n.exitCriticalSection()
 }
 
 func (n *node) exitCriticalSection() {
+
+	n.updateAndIncrementLamport(n.LamportTime)
+
+	log.Printf("Peer: %v: Exiting critical section at Lamport time %v", n.ID, n.LamportTime)
+
 	n.State = "RELEASED"
-	n.requestingCriticalSection = false
 	n.processRequestQueue()
 }
 
-func (node *node) broadcastMessage(msg *nd.Message) {
-	//Increment lamport, maybe synchronize?
-
-	// Loops through all clients and sends the given message.
-	for _, client := range node.Peers {
-		if err := client.Send(msg); err != nil {
-			log.Printf("Failed to broadcast message: %v", err)
-		}
-	}
-}
-
 func (n *node) requestCriticalSection() {
+
+	n.updateAndIncrementLamport(n.LamportTime)
 
 	n.State = "WANTED"
 	n.requestingCriticalSection = true
@@ -239,17 +245,34 @@ func (node *node) updateAndIncrementLamport(receivedTimestamp int32) int32 {
 // Write methods hardcoded
 
 func write(node *node) {
+
+	node.updateAndIncrementLamport(node.LamportTime)
+
+	// Open the file with read, write, create and append mode
 	data, err := os.OpenFile("DataFile", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0664)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}
-	defer data.Close()
+	defer data.Close() // Ensure file is closed when function exits
 
+	// Create a buffered writer
 	w := bufio.NewWriter(data)
-	_, err = w.WriteString("Hello World")
+
+	// Write the string to the buffer
+
+	_, err = w.WriteString("Hello World\n") // Added newline for readability in file
 	if err != nil {
+		log.Printf("Error writing to buffer: %v", err)
 		return
 	}
 
+	// Flush the buffer to ensure data is written to the file
+	err = w.Flush()
+	if err != nil {
+		log.Printf("Error flushing buffer to file: %v", err)
+		return
+	}
+
+	// Log successful write
 	log.Printf("Peer %v wrote to data at Lamport time %v.\n", node.ID, node.LamportTime)
 }
