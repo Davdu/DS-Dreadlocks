@@ -60,7 +60,7 @@ func main() {
 		PeerIds:          make(map[int32]nd.Node_MessagesClient),
 	}
 
-	// Start the server in a separate goroutine
+	// Start the Server in a separate goroutine
 	go startGRPCServer(node)
 
 	time.Sleep(10 * time.Second) // Establish connections to other nodes
@@ -81,13 +81,13 @@ func startGRPCServer(node *node) {
 		log.Fatalf("Failed to listen: %v", err)
 	}
 	grpcServer := grpc.NewServer()
-	// Register your server implementation
+	// Register your Server implementation
 	nd.RegisterNodeServer(grpcServer, node)
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
 	}
 
-	log.Println("Peer: ", node.ID, " Started server")
+	log.Println("Peer: ", node.ID, " Started Server")
 }
 
 func connectToOtherNodes(node *node) {

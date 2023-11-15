@@ -5,10 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cab107e2-a770-4bb0-828e-7bef6d7ff151" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/MandatoryAssignments/Auction/Server/server.proto" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/DisMutExc/DataFile" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/DisMutExc/LogFile" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/DisMutExc/ips" beforeDir="false" afterPath="$PROJECT_DIR$/MandatoryAssignments/DisMutExc/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/Auction/AuctionClient.go" beforeDir="false" afterPath="$PROJECT_DIR$/MandatoryAssignments/Auction/AuctionClient.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/Auction/AuctionServer.go" beforeDir="false" afterPath="$PROJECT_DIR$/MandatoryAssignments/Auction/AuctionServer.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/Auction/proto/proto.proto" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/ChittyChat/Server.go" beforeDir="false" afterPath="$PROJECT_DIR$/MandatoryAssignments/ChittyChat/Server.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/ChittyChat/chittychat/ChittyChat.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/MandatoryAssignments/ChittyChat/chittychat/ChittyChat.pb.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/ChittyChat/chittychat/ChittyChat_grpc.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/MandatoryAssignments/ChittyChat/chittychat/ChittyChat_grpc.pb.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/DisMutExc/Peer.go" beforeDir="false" afterPath="$PROJECT_DIR$/MandatoryAssignments/DisMutExc/Peer.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/DisMutExc/node/node.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/MandatoryAssignments/DisMutExc/node/node.pb.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/DisMutExc/node/node_grpc.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/MandatoryAssignments/DisMutExc/node/node_grpc.pb.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/TCP/Protocol.go" beforeDir="false" afterPath="$PROJECT_DIR$/MandatoryAssignments/TCP/Protocol.go" afterDir="false" />
     </list>
     <list id="69e78ce6-687e-4cff-bb58-9c0552039e1b" name="Changes by Administrator" comment="" />
     <option name="SHOW_DIALOG" value="false" />
@@ -23,7 +31,7 @@
       </list>
     </option>
   </component>
-  <component name="GOROOT" url="file://$PROJECT_DIR$/../../../../../Program Files/Go" />
+  <component name="GOROOT" url="file://$PROJECT_DIR$/../../../../../../Program Files/Go" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>

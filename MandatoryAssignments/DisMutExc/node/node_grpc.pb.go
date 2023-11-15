@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v4.24.4
-// source: node.proto
+// source: node.Server
 
 package __
 
@@ -68,7 +68,7 @@ func (x *nodeMessagesClient) Recv() (*Message, error) {
 	return m, nil
 }
 
-// NodeServer is the server API for Node service.
+// NodeServer is the Server API for Node service.
 // All implementations must embed UnimplementedNodeServer
 // for forward compatibility
 type NodeServer interface {
@@ -137,5 +137,5 @@ var Node_ServiceDesc = grpc.ServiceDesc{
 			ClientStreams: true,
 		},
 	},
-	Metadata: "node.proto",
+	Metadata: "node.Server",
 }

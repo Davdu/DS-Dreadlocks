@@ -14,7 +14,7 @@ type message struct {
 
 func main() {
 	// Creates the channels necessary for communication as well as the implementation specific termination channel,
-	// which is simply used for terminating the program when the server has recieved all packets
+	// which is simply used for terminating the program when the Server has recieved all packets
 	clientSend := make(chan message, 10000)
 	serverSend := make(chan message, 10000)
 	terminate := make(chan bool)
@@ -53,7 +53,7 @@ func server(send, receive chan message, terminate chan bool) {
 	for {
 		select {
 		case recievedData := <-receive:
-			//Increment server calculated checksum to ensure data completeness
+			//Increment Server calculated checksum to ensure data completeness
 			checksum++
 			fmt.Println("Server recieved message:", recievedData)
 

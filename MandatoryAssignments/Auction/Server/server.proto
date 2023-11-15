@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package Server;
+option go_package="./";
+
+service Auction {
+  rpc Bid(bid) returns (ack) {}
+  rpc Result(result) returns (ack) {}
+  rpc Sync(sync) returns (ack) {}
+}
+
+message ack {
+  bool valid = 1;
+  string comment = 2;
+}
+
+message bid {
+  int32 ID = 1;
+  int32 amount = 2;
+}
+
+message result {
+  string comment = 1;
+  bool auctionFinished = 2;
+}
+
+message sync {
+  int32 highestBid = 1;
+  int32 highestBidderId = 2;
+}
+

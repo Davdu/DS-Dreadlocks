@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v4.24.4
-// source: ChittyChat.proto
+// source: ChittyChat.Server
 
 package chittychat
 
@@ -68,7 +68,7 @@ func (x *chittyChatMessagesClient) Recv() (*Message, error) {
 	return m, nil
 }
 
-// ChittyChatServer is the server API for ChittyChat service.
+// ChittyChatServer is the Server API for ChittyChat service.
 // All implementations must embed UnimplementedChittyChatServer
 // for forward compatibility
 type ChittyChatServer interface {
@@ -137,5 +137,5 @@ var ChittyChat_ServiceDesc = grpc.ServiceDesc{
 			ClientStreams: true,
 		},
 	},
-	Metadata: "ChittyChat.proto",
+	Metadata: "ChittyChat.Server",
 }

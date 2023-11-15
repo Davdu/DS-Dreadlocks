@@ -102,7 +102,7 @@ func main() {
 	// Setup port
 	lis, _ := net.Listen("tcp", ":50051")
 
-	// Generate new server
+	// Generate new Server
 	grpcServer := grpc.NewServer()
 
 	service := &server{

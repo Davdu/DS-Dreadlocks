@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.31.0
 // 	protoc        v4.24.4
-// source: ChittyChat.proto
+// source: ChittyChat.Server
 
 package chittychat
 
