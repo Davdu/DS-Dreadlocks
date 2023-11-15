@@ -5,18 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cab107e2-a770-4bb0-828e-7bef6d7ff151" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/MandatoryAssignments/Auction/Server/server.proto" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MandatoryAssignments/Auction/AuctionClient.go" beforeDir="false" afterPath="$PROJECT_DIR$/MandatoryAssignments/Auction/AuctionClient.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MandatoryAssignments/Auction/AuctionServer.go" beforeDir="false" afterPath="$PROJECT_DIR$/MandatoryAssignments/Auction/AuctionServer.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/Auction/proto/proto.proto" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/ChittyChat/Server.go" beforeDir="false" afterPath="$PROJECT_DIR$/MandatoryAssignments/ChittyChat/Server.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/ChittyChat/chittychat/ChittyChat.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/MandatoryAssignments/ChittyChat/chittychat/ChittyChat.pb.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/ChittyChat/chittychat/ChittyChat_grpc.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/MandatoryAssignments/ChittyChat/chittychat/ChittyChat_grpc.pb.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/DisMutExc/Peer.go" beforeDir="false" afterPath="$PROJECT_DIR$/MandatoryAssignments/DisMutExc/Peer.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/DisMutExc/node/node.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/MandatoryAssignments/DisMutExc/node/node.pb.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/DisMutExc/node/node_grpc.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/MandatoryAssignments/DisMutExc/node/node_grpc.pb.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/TCP/Protocol.go" beforeDir="false" afterPath="$PROJECT_DIR$/MandatoryAssignments/TCP/Protocol.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/Auction/Server/server.pb.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/Auction/Server/server.proto" beforeDir="false" afterPath="$PROJECT_DIR$/MandatoryAssignments/Auction/Server/server.proto" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/Auction/Server/server_grpc.pb.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/Auction/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/MandatoryAssignments/Auction/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/Auction/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/MandatoryAssignments/Auction/go.sum" afterDir="false" />
     </list>
     <list id="69e78ce6-687e-4cff-bb58-9c0552039e1b" name="Changes by Administrator" comment="" />
     <option name="SHOW_DIALOG" value="false" />
@@ -35,8 +31,14 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/MandatoryAssignments/Auction/AuctionServer.go" root0="FORCE_HIGHLIGHTING" />
+  </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 5
@@ -60,7 +62,7 @@
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
     &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/madsd&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/madsd/OneDrive/Dokumenter/GitHub/DS-Dreadlocks/MandatoryAssignments/Auction&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;go.autoimport&quot;
@@ -74,6 +76,16 @@
       <kind value="FILE" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="go build DS-Dreadlocks" type="GoApplicationRunConfiguration" factoryName="Go Application" nameIsGenerated="true">
+      <module name="DS-Dreadlocks" />
+      <working_directory value="$PROJECT_DIR$/MandatoryAssignments/Auction" />
+      <go_parameters value="-i" />
+      <kind value="DIRECTORY" />
+      <directory value="$PROJECT_DIR$/MandatoryAssignments/Auction" />
+      <filePath value="$PROJECT_DIR$/../DS-Dreadlocks|$PROJECT_DIR$/MandatoryAssignments/Auction/AuctionServer.go" />
+      <output_directory value="$PROJECT_DIR$/MandatoryAssignments/Auction" />
       <method v="2" />
     </configuration>
     <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
@@ -104,5 +116,16 @@
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/MandatoryAssignments/Auction/AuctionServer.go</url>
+          <line>71</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

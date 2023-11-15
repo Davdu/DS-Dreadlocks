@@ -23,8 +23,9 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AuctionClient interface {
 	Bid(ctx context.Context, in *Bid, opts ...grpc.CallOption) (*Ack, error)
-	Result(ctx context.Context, in *Result, opts ...grpc.CallOption) (*Ack, error)
+	Update(ctx context.Context, in *CallForUpdate, opts ...grpc.CallOption) (*Sync, error)
 	Sync(ctx context.Context, in *Sync, opts ...grpc.CallOption) (*Ack, error)
+	IsLeader(ctx context.Context, in *CheckLeader, opts ...grpc.CallOption) (*Ack, error)
 }
 
 type auctionClient struct {
@@ -44,9 +45,9 @@ func (c *auctionClient) Bid(ctx context.Context, in *Bid, opts ...grpc.CallOptio
 	return out, nil
 }
 
-func (c *auctionClient) Result(ctx context.Context, in *Result, opts ...grpc.CallOption) (*Ack, error) {
-	out := new(Ack)
-	err := c.cc.Invoke(ctx, "/Server.Auction/Result", in, out, opts...)
+func (c *auctionClient) Update(ctx context.Context, in *CallForUpdate, opts ...grpc.CallOption) (*Sync, error) {
+	out := new(Sync)
+	err := c.cc.Invoke(ctx, "/Server.Auction/Update", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -62,13 +63,23 @@ func (c *auctionClient) Sync(ctx context.Context, in *Sync, opts ...grpc.CallOpt
 	return out, nil
 }
 
+func (c *auctionClient) IsLeader(ctx context.Context, in *CheckLeader, opts ...grpc.CallOption) (*Ack, error) {
+	out := new(Ack)
+	err := c.cc.Invoke(ctx, "/Server.Auction/IsLeader", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuctionServer is the server API for Auction service.
 // All implementations must embed UnimplementedAuctionServer
 // for forward compatibility
 type AuctionServer interface {
 	Bid(context.Context, *Bid) (*Ack, error)
-	Result(context.Context, *Result) (*Ack, error)
+	Update(context.Context, *CallForUpdate) (*Sync, error)
 	Sync(context.Context, *Sync) (*Ack, error)
+	IsLeader(context.Context, *CheckLeader) (*Ack, error)
 	mustEmbedUnimplementedAuctionServer()
 }
 
@@ -79,11 +90,14 @@ type UnimplementedAuctionServer struct {
 func (UnimplementedAuctionServer) Bid(context.Context, *Bid) (*Ack, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Bid not implemented")
 }
-func (UnimplementedAuctionServer) Result(context.Context, *Result) (*Ack, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Result not implemented")
+func (UnimplementedAuctionServer) Update(context.Context, *CallForUpdate) (*Sync, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
 func (UnimplementedAuctionServer) Sync(context.Context, *Sync) (*Ack, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Sync not implemented")
+}
+func (UnimplementedAuctionServer) IsLeader(context.Context, *CheckLeader) (*Ack, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IsLeader not implemented")
 }
 func (UnimplementedAuctionServer) mustEmbedUnimplementedAuctionServer() {}
 
@@ -116,20 +130,20 @@ func _Auction_Bid_Handler(srv interface{}, ctx context.Context, dec func(interfa
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Auction_Result_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Result)
+func _Auction_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CallForUpdate)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AuctionServer).Result(ctx, in)
+		return srv.(AuctionServer).Update(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Server.Auction/Result",
+		FullMethod: "/Server.Auction/Update",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuctionServer).Result(ctx, req.(*Result))
+		return srv.(AuctionServer).Update(ctx, req.(*CallForUpdate))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -152,6 +166,24 @@ func _Auction_Sync_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Auction_IsLeader_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CheckLeader)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuctionServer).IsLeader(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Server.Auction/IsLeader",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuctionServer).IsLeader(ctx, req.(*CheckLeader))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Auction_ServiceDesc is the grpc.ServiceDesc for Auction service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -164,12 +196,16 @@ var Auction_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Auction_Bid_Handler,
 		},
 		{
-			MethodName: "Result",
-			Handler:    _Auction_Result_Handler,
+			MethodName: "Update",
+			Handler:    _Auction_Update_Handler,
 		},
 		{
 			MethodName: "Sync",
 			Handler:    _Auction_Sync_Handler,
+		},
+		{
+			MethodName: "IsLeader",
+			Handler:    _Auction_IsLeader_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
