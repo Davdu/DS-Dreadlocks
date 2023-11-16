@@ -26,6 +26,7 @@ type AuctionClient interface {
 	Update(ctx context.Context, in *CallForUpdate, opts ...grpc.CallOption) (*Sync, error)
 	Sync(ctx context.Context, in *Sync, opts ...grpc.CallOption) (*Ack, error)
 	IsLeader(ctx context.Context, in *CheckLeader, opts ...grpc.CallOption) (*Ack, error)
+	ReturnConnection(ctx context.Context, in *ReturnConnection, opts ...grpc.CallOption) (*Ack, error)
 }
 
 type auctionClient struct {
@@ -72,6 +73,15 @@ func (c *auctionClient) IsLeader(ctx context.Context, in *CheckLeader, opts ...g
 	return out, nil
 }
 
+func (c *auctionClient) ReturnConnection(ctx context.Context, in *ReturnConnection, opts ...grpc.CallOption) (*Ack, error) {
+	out := new(Ack)
+	err := c.cc.Invoke(ctx, "/Server.Auction/ReturnConnection", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuctionServer is the server API for Auction service.
 // All implementations must embed UnimplementedAuctionServer
 // for forward compatibility
@@ -80,6 +90,7 @@ type AuctionServer interface {
 	Update(context.Context, *CallForUpdate) (*Sync, error)
 	Sync(context.Context, *Sync) (*Ack, error)
 	IsLeader(context.Context, *CheckLeader) (*Ack, error)
+	ReturnConnection(context.Context, *ReturnConnection) (*Ack, error)
 	mustEmbedUnimplementedAuctionServer()
 }
 
@@ -98,6 +109,9 @@ func (UnimplementedAuctionServer) Sync(context.Context, *Sync) (*Ack, error) {
 }
 func (UnimplementedAuctionServer) IsLeader(context.Context, *CheckLeader) (*Ack, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method IsLeader not implemented")
+}
+func (UnimplementedAuctionServer) ReturnConnection(context.Context, *ReturnConnection) (*Ack, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReturnConnection not implemented")
 }
 func (UnimplementedAuctionServer) mustEmbedUnimplementedAuctionServer() {}
 
@@ -184,6 +198,24 @@ func _Auction_IsLeader_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Auction_ReturnConnection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReturnConnection)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuctionServer).ReturnConnection(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Server.Auction/ReturnConnection",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuctionServer).ReturnConnection(ctx, req.(*ReturnConnection))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Auction_ServiceDesc is the grpc.ServiceDesc for Auction service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -206,6 +238,10 @@ var Auction_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "IsLeader",
 			Handler:    _Auction_IsLeader_Handler,
+		},
+		{
+			MethodName: "ReturnConnection",
+			Handler:    _Auction_ReturnConnection_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

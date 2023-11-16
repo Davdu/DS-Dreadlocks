@@ -8,6 +8,7 @@ service Auction {
   rpc Update(callForUpdate) returns (sync) {}
   rpc Sync(sync) returns (ack) {}
   rpc IsLeader(checkLeader) returns (ack) {}
+  rpc ReturnConnection(returnConnection) returns (ack) {}
 }
 
 message ack {
@@ -36,4 +37,9 @@ message callForUpdate{
 
 message checkLeader{
   int32 lamport = 1;
+}
+
+message returnConnection {
+  int32 ID = 1;
+  int32 Lamport = 2;
 }
