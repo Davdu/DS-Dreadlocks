@@ -8,9 +8,9 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MandatoryAssignments/Auction/AuctionClient.go" beforeDir="false" afterPath="$PROJECT_DIR$/MandatoryAssignments/Auction/AuctionClient.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MandatoryAssignments/Auction/AuctionServer.go" beforeDir="false" afterPath="$PROJECT_DIR$/MandatoryAssignments/Auction/AuctionServer.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/Auction/Server/server.pb.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/Auction/Server/server.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/MandatoryAssignments/Auction/Server/server.pb.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MandatoryAssignments/Auction/Server/server.proto" beforeDir="false" afterPath="$PROJECT_DIR$/MandatoryAssignments/Auction/Server/server.proto" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/Auction/Server/server_grpc.pb.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/Auction/Server/server_grpc.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/MandatoryAssignments/Auction/Server/server_grpc.pb.go" afterDir="false" />
     </list>
     <list id="69e78ce6-687e-4cff-bb58-9c0552039e1b" name="Changes by Administrator" comment="" />
     <option name="SHOW_DIALOG" value="false" />
@@ -132,5 +132,12 @@
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>
+  </component>
+  <component name="XDebuggerManager">
+    <watches-manager>
+      <configuration name="GoApplicationRunConfiguration">
+        <watch expression="ctx" />
+      </configuration>
+    </watches-manager>
   </component>
 </project>

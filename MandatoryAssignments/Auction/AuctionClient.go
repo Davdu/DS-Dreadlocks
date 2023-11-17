@@ -12,10 +12,10 @@ import (
 
 type AuctionClient struct {
 	s.UnimplementedAuctionServer
-	server     s.AuctionClient
-	ID         string
-	Lamport    int32
-	HighestBid int32
+	server        s.AuctionClient
+	ID            string
+	HighestBid    int32
+	HighestBidder string
 }
 
 func main() {
@@ -64,7 +64,7 @@ func (client *AuctionClient) connectToServer(lookForLeader bool) {
 
 	// Log and print the successful connection information
 	log.Printf("Client: %v: connected to server on %v\n", client.ID, conn.Target())
-	fmt.Printf("Client: %v: connected to server on %v\n", client.ID, conn.Target())
+	fmt.Printf("Connected to server on %v\n", conn.Target())
 
 	// Create a gRPC client based on the obtained connection
 	client.server = s.NewAuctionClient(conn)
@@ -74,11 +74,21 @@ func (client *AuctionClient) connectToServer(lookForLeader bool) {
 // If 'lookForLeader' is true, it ensures that the server found is also the leader.
 func (client *AuctionClient) findValidServerConn(lookForLeader bool) (connection *grpc.ClientConn) {
 	// Set a timeout for the connection attempt
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
-	// Iterate over 10 ports (assumed range of server ports)
-	for i := 0; i < 10; i++ {
+	invalidPortsInARow := 0
+
+	// Iterate until 10 consecutive invalid ports are found or a valid connection is established
+	// If not looking for a leader, the client will connect to the first server it finds.
+	// If looking for a leader, the client will connect to the first server it finds that is also the leader.
+	for i := 0; ; i++ {
+
+		if invalidPortsInARow >= 10 {
+			// If 10 consecutive invalid ports are found and 'lookForLeader' is true, break out of the loop
+			break
+		}
+
 		// Generate the port based on the iteration
 		port := fmt.Sprintf("localhost:%d", 50000+i)
 
@@ -86,21 +96,33 @@ func (client *AuctionClient) findValidServerConn(lookForLeader bool) (connection
 		conn, err := grpc.DialContext(ctx, port, grpc.WithInsecure(), grpc.WithBlock(), grpc.FailOnNonTempDialError(true))
 		if err != nil {
 			// If there is an error, indicating no server available on port, continue to the next iteration
+			invalidPortsInARow++
 			continue
 		} else if lookForLeader {
+			// If 'lookForLeader' is true, check if the connected server is the leader
+
+			invalidPortsInARow = 0 // Reset the counter because a valid port was found
+
 			// If looking for a leader, check if the connected server is the leader
-			ack, err := s.NewAuctionClient(conn).IsLeader(context.Background(), &s.CheckLeader{Lamport: client.Lamport})
+			ack, err := s.NewAuctionClient(conn).IsLeader(context.Background(), &s.Empty{})
 			if err != nil {
 				// If there is an error, continue to the next iteration
+				invalidPortsInARow++
 				continue
 			}
+
 			if ack.Valid {
 				// If the connected server is the leader, set 'connection' and break out of the loop
 				connection = conn
 				break
+			} else {
+				// If the connected server is not the leader, continue to the next iteration
+				invalidPortsInARow++
+				continue
 			}
+
 		} else {
-			// If not looking for a leader, set 'connection' and break out of the loop
+			// If not looking for a leader, set 'connection' to the first valid connection and break out of the loop
 			connection = conn
 			break
 		}
@@ -108,8 +130,12 @@ func (client *AuctionClient) findValidServerConn(lookForLeader bool) (connection
 
 	// If no leader is found and 'lookForLeader' is true, recursively call the function with 'lookForLeader' set to false
 	if connection == nil && lookForLeader {
+		log.Printf("Client: %v: no leader found. Retrying without looking for leader\n", client.ID)
 		connection = client.findValidServerConn(false)
+		return connection
 	}
+
+	log.Printf("Client: %v: found valid server on port %v\n", client.ID, connection.Target())
 
 	// Return the valid connection, if found
 	return connection
@@ -118,11 +144,21 @@ func (client *AuctionClient) findValidServerConn(lookForLeader bool) (connection
 // Bid submits a bid to the connected server with the specified amount.
 // It handles server responses and takes appropriate actions based on the returned acknowledgment.
 func (client *AuctionClient) Bid(amount int32) {
+
+	// Perform clientside checks
+	if client.HighestBidder == client.ID {
+		fmt.Println("You are already the highest bidder")
+		return
+	} else if amount <= client.HighestBid {
+		fmt.Println("Bid is too low")
+		return
+	}
+
+	log.Printf("Client: %v: attempting to bid %d\n", client.ID, amount)
 	// Send a bid request to the server
 	ack, err := client.server.Bid(context.Background(), &s.Bid{
-		Amount:  amount,
-		ID:      client.ID,
-		Lamport: client.Lamport,
+		Amount: amount,
+		ID:     client.ID,
 	})
 
 	// Handle the case where an error occurs during the bid request
@@ -132,41 +168,45 @@ func (client *AuctionClient) Bid(amount int32) {
 		return
 	}
 
+	var response string
+
 	// Handle server acknowledgment
 	if !ack.Valid {
 		// Process different return codes and take appropriate actions
 		switch ack.ReturnCode {
 		case 1:
-			fmt.Println("Another server is the leader. Reconnecting...")
+			response = "Another server is the leader. Reconnecting..."
 			client.connectToServer(true)
 			client.Bid(amount)
 			return
 		case 2:
-			fmt.Println("Bid is too low")
+			response = "Bid is too low"
 			return
 		case 3:
-			fmt.Println("You are already the highest bidder")
+			response = "You are already the highest bidder"
 			return
 		case 4:
-			fmt.Println("Item is already sold")
+			response = "Item is already sold"
 			return
 		default:
-			fmt.Println("Unknown return code")
+			response = "Unknown return code"
 			return
 		}
 	} else {
 		// If the bid is successful, update information
+		response = "Bid successful"
 		client.Update()
 	}
+
+	log.Printf("Client: %v: bid server response: %v\n", client.ID, response)
+
 }
 
 // Update retrieves the latest auction information from the server and updates the client's state.
 // It handles server responses and takes appropriate actions based on the returned synchronization data.
 func (client *AuctionClient) Update() {
 	// Request synchronization data from the server
-	sync, err := client.server.Result(context.Background(), &s.CallForUpdate{
-		Lamport: client.Lamport,
-	})
+	sync, err := client.server.Result(context.Background(), &s.Empty{})
 
 	// Handle the case where an error occurs during the synchronization request
 	if err != nil {
@@ -179,6 +219,7 @@ func (client *AuctionClient) Update() {
 	if sync.Sold {
 		// Display information about the sold item and terminate the client
 		fmt.Printf("Item sold to %s for %d\n", sync.HighestBidder, sync.HighestBid)
+		log.Printf("Client: %v: Terminating\n", client.ID)
 		os.Exit(0)
 	}
 
@@ -190,6 +231,7 @@ func (client *AuctionClient) Update() {
 
 	// Update the client's highest bid based on the synchronization data
 	client.HighestBid = sync.HighestBid
+	client.HighestBidder = sync.HighestBidder
 }
 
 // updateIntermittently continuously updates the client's state at regular intervals.

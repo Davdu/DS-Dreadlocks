@@ -20,7 +20,6 @@ type AuctionServer struct {
 	sold          bool
 	isLeader      bool
 	port          string
-	lamportTime   int32
 	timeRemaining int32
 	backupServers []*backupServer
 }
@@ -36,7 +35,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}
-	defer f.Close()
+	defer func(f *os.File) {
+		err := f.Close()
+		if err != nil {
+			log.Fatalf("error closing file: %v", err)
+		}
+	}(f)
 	log.SetOutput(f)
 
 	// Create an AuctionServer instance with initial parameters
@@ -68,7 +72,8 @@ func startGRPCServer(server *AuctionServer) {
 	if err != nil {
 		// Log the failure to listen
 		log.Printf("Failed to listen: %v\n", err)
-		log.Println("New Server will retry connecting in 5 seconds...")
+		log.Printf("Server --: Port already taken. Likely caused by multiple servers reserving same port before one starts.\n " +
+			"Will reserve new port in 5 seconds...\n")
 
 		// Wait for 5 seconds before retrying and looking for a new port to allow for another server to finish starting
 		time.Sleep(5 * time.Second)
@@ -83,15 +88,15 @@ func startGRPCServer(server *AuctionServer) {
 	// Register the AuctionServer implementation
 	s.RegisterAuctionServer(grpcServer, server)
 
-	// Log the successful server start
-	log.Printf("Server: %v started on port %s", server.ID, server.port)
-
 	// Start listening for incoming requests
 	go requestReturnConnections(server)
 
 	// Serve gRPC requests
+	log.Printf("Server %v: Now serving requests on %v\n", server.ID, server.port)
+	fmt.Printf("Server %v: Now serving requests on %v\n", server.ID, server.port)
+
 	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("Failed to serve: %v", err)
+		log.Fatalf("Server %v: Failed to serve: %v", server.ID, err)
 	}
 }
 
@@ -108,6 +113,9 @@ func establishConnectionsAndReservePort(server *AuctionServer) {
 	portSet := false
 	freePortsInARow := 0
 
+	// Reset the backupServers slice
+	server.backupServers = []*backupServer{}
+
 	for i := 0; ; i++ {
 		// Attempt to open a connection to the server on port 50000 + i
 		err := openConnection(int32(i), server)
@@ -122,13 +130,18 @@ func establishConnectionsAndReservePort(server *AuctionServer) {
 				portSet = true
 			} else if freePortsInARow >= 10 {
 				// If 10 consecutive free ports are found, return
-				return
+				break
 			}
 		} else {
 			// Reset the count of consecutive free ports if a connection is successfully established
 			freePortsInARow = 0
 		}
 	}
+
+	for i := range server.backupServers {
+		log.Printf("Server %v: Connected to server on port %v\n", server.ID, server.backupServers[i].Conn.Target())
+	}
+
 }
 
 // canConnectToPort checks if a connection can be established to the specified port.
@@ -167,9 +180,7 @@ func openConnection(id int32, server *AuctionServer) error {
 	var bs = &backupServer{Server: otherServer, Conn: conn}
 	server.backupServers = append(server.backupServers, bs)
 
-	// Update the Lamport time when the connection is opened
-	server.updateAndIncrementLamport(server.lamportTime)
-	fmt.Printf("New connection: Connected to port %v, at Lamport: %v\n", port, server.lamportTime)
+	fmt.Printf("Connected to server on port %v\n", conn.Target())
 
 	return nil
 }
@@ -183,7 +194,7 @@ func removeUnavailableServers(server *AuctionServer) {
 		_, _, err := canConnectToPort(server.backupServers[i].Conn.Target())
 		if err != nil {
 			// Remove connection from backupServers slice
-			log.Printf("Connection to server: %v lost\n", server.backupServers[i].Conn.Target())
+			log.Printf("Server %v: Connection to server %v lost\n", server.ID, server.backupServers[i].Conn.Target())
 
 			// Swap the element to the end of the slice
 			server.backupServers[i], server.backupServers[len(server.backupServers)-1] = server.backupServers[len(server.backupServers)-1], server.backupServers[i]
@@ -199,19 +210,10 @@ func requestReturnConnections(server *AuctionServer) {
 	// Wait until this server is likely online
 	time.Sleep(5 * time.Second)
 
-	// Update Lamport time when sending a message
-	server.updateAndIncrementLamport(server.lamportTime)
-
 	// Iterate through backup servers and send a ReturnConnection request
 	for _, backupServer := range server.backupServers {
 		// Send a ReturnConnection request to the backup server
-		ack, err := backupServer.Server.ReturnConnection(context.Background(), &s.ReturnConnection{
-			ID:      server.ID,
-			Lamport: server.lamportTime,
-		})
-
-		// Update Lamport time when receiving a message
-		server.updateAndIncrementLamport(ack.Lamport)
+		_, err := backupServer.Server.ReturnConnection(context.Background(), &s.ReturnConnection{ID: server.ID})
 
 		// Continue to the next backup server in case of an error
 		if err != nil {
@@ -225,12 +227,7 @@ func requestReturnConnections(server *AuctionServer) {
 //##################################################
 
 // Result handles the CallForUpdate RPC call, providing the current state of the auction server to the client.
-func (server *AuctionServer) Result(_ context.Context, incoming *s.CallForUpdate) (*s.Sync, error) {
-	// Update Lamport time when receiving a message
-	server.updateAndIncrementLamport(incoming.Lamport)
-
-	// Update Lamport time when sending a message
-	server.updateAndIncrementLamport(server.lamportTime)
+func (server *AuctionServer) Result(_ context.Context, _ *s.Empty) (*s.Sync, error) {
 
 	// Return a Sync message with the current state of the server
 	return &s.Sync{
@@ -238,14 +235,11 @@ func (server *AuctionServer) Result(_ context.Context, incoming *s.CallForUpdate
 		HighestBidder: server.highestBidder,
 		Sold:          server.sold,
 		TimeRemaining: server.timeRemaining,
-		Lamport:       server.lamportTime,
 	}, nil
 }
 
 // Sync handles the Sync RPC call, synchronizing the state of the auction server with the incoming Sync message.
 func (server *AuctionServer) Sync(_ context.Context, incoming *s.Sync) (*s.Ack, error) {
-	// Update Lamport time when receiving a message
-	server.updateAndIncrementLamport(incoming.Lamport)
 
 	// Update server state with the incoming Sync message
 	server.highestBid = incoming.HighestBid
@@ -253,8 +247,7 @@ func (server *AuctionServer) Sync(_ context.Context, incoming *s.Sync) (*s.Ack, 
 	server.sold = incoming.Sold
 	server.timeRemaining = incoming.TimeRemaining
 
-	// Update Lamport time when sending a message
-	server.updateAndIncrementLamport(incoming.Lamport)
+	log.Printf("Server %v: Synchronized\n", server.ID)
 
 	// Return a valid acknowledgment
 	return &s.Ack{Valid: true}, nil
@@ -262,8 +255,6 @@ func (server *AuctionServer) Sync(_ context.Context, incoming *s.Sync) (*s.Ack, 
 
 // Bid handles the Bid RPC call, processing incoming bids and updating the server state accordingly.
 func (server *AuctionServer) Bid(_ context.Context, incoming *s.Bid) (ack *s.Ack, err error) {
-	// Update Lamport time when receiving a message
-	server.updateAndIncrementLamport(incoming.Lamport)
 
 	// Ensure that the server is the leader
 	if !server.isLeader {
@@ -277,6 +268,8 @@ func (server *AuctionServer) Bid(_ context.Context, incoming *s.Bid) (ack *s.Ack
 			log.Printf("Server: %v is now the leader\n", server.ID)
 		}
 	}
+
+	log.Printf("Server %v: Received bid from %v for %v\n", server.ID, incoming.ID, incoming.Amount)
 
 	// Handle bid
 	if server.highestBid >= incoming.Amount {
@@ -292,27 +285,28 @@ func (server *AuctionServer) Bid(_ context.Context, incoming *s.Bid) (ack *s.Ack
 		// Update server state with the incoming bid
 		server.highestBid = incoming.Amount
 		server.highestBidder = incoming.ID
-		server.synchronizeWithBackupServers()
+		log.Printf("Server %v: Highest bid is now %v from %v\n", server.ID, server.highestBid, server.highestBidder)
 		ack = &s.Ack{Valid: true, ReturnCode: 0} // Bid successful
 	}
 
-	// Round off
-	server.timeRemaining -= rand.Int31n(10)            // Randomly decrement time remaining to simulate time passing
-	server.updateAndIncrementLamport(incoming.Lamport) // Update Lamport time when sending a message
-	ack.Lamport = server.lamportTime                   // Set ack Lamport time to the current Lamport time after updating it
-
-	// Check if the time has expired, mark the item as sold
-	if server.timeRemaining <= 0 {
+	server.timeRemaining -= rand.Int31n(10) // Randomly decrement time remaining to simulate time passing
+	if server.timeRemaining <= 0 {          // Check if the time has expired, mark the item as sold
 		server.sold = true
+		log.Printf("Server %v: Item sold to %v for %v\n", server.ID, server.highestBidder, server.highestBid)
+	}
+
+	// Round off
+	server.synchronizeBackupServers() // Synchronize with backup servers
+
+	if ack.ReturnCode != 0 {
+		log.Printf("Server %v: Bid unsuccessful\n", server.ID)
 	}
 
 	return ack, nil
 }
 
 // IsLeader handles the CheckLeader RPC call, determining if the server is the leader.
-func (server *AuctionServer) IsLeader(_ context.Context, incoming *s.CheckLeader) (ack *s.Ack, err error) {
-	// Update Lamport time when receiving a message
-	server.updateAndIncrementLamport(incoming.Lamport)
+func (server *AuctionServer) IsLeader(_ context.Context, _ *s.Empty) (ack *s.Ack, err error) {
 
 	// Check if the server is the leader
 	if server.isLeader {
@@ -321,30 +315,23 @@ func (server *AuctionServer) IsLeader(_ context.Context, incoming *s.CheckLeader
 		ack = &s.Ack{Valid: false}
 	}
 
-	// Update Lamport time when sending a message
-	server.updateAndIncrementLamport(incoming.Lamport)
-
 	return ack, nil
 }
 
 // ReturnConnection handles the ReturnConnection RPC call, allowing other servers to reconnect.
 func (server *AuctionServer) ReturnConnection(_ context.Context, incoming *s.ReturnConnection) (ack *s.Ack, err error) {
-	// Update Lamport time when receiving a message
-	server.updateAndIncrementLamport(incoming.Lamport)
 
 	// Attempt to open a connection to the server with the given ID
 	err = openConnection(incoming.ID, server)
 	if err != nil {
 		// Connection failed, return acknowledgment with appropriate ReturnCode
-		ack = &s.Ack{Valid: false, ReturnCode: 1, Lamport: server.lamportTime}
+		ack = &s.Ack{Valid: false, ReturnCode: 1}
+		log.Printf("Server %v: Failed to connect to server on port %v\n", server.ID, "localhost:"+string(50000+incoming.ID))
 	} else {
 		// Connection successful, return acknowledgment with appropriate ReturnCode
-		ack = &s.Ack{Valid: true, ReturnCode: 0, Lamport: server.lamportTime}
+		ack = &s.Ack{Valid: true, ReturnCode: 0}
+		log.Printf("Server %v: Connected to server on port %v\n", server.ID, server.backupServers[len(server.backupServers)-1].Conn.Target())
 	}
-
-	// Update Lamport time when sending a message
-	server.updateAndIncrementLamport(server.lamportTime)
-	ack.Lamport = server.lamportTime
 
 	return ack, nil
 }
@@ -353,10 +340,9 @@ func (server *AuctionServer) ReturnConnection(_ context.Context, incoming *s.Ret
 //############## RPC callers #######################
 //##################################################
 
-// synchronizeWithBackupServers sends synchronization messages to backup servers.
-func (server *AuctionServer) synchronizeWithBackupServers() {
-	// Update Lamport time before sending messages
-	server.updateAndIncrementLamport(server.lamportTime)
+// synchronizeBackupServers sends synchronization messages to backup servers.
+func (server *AuctionServer) synchronizeBackupServers() {
+
 	errorOccurred := false
 
 	// Iterate over backup servers and send synchronization messages
@@ -367,7 +353,6 @@ func (server *AuctionServer) synchronizeWithBackupServers() {
 			HighestBidder: server.highestBidder,
 			Sold:          server.sold,
 			TimeRemaining: server.timeRemaining,
-			Lamport:       server.lamportTime,
 		})
 
 		// Check for errors in sending message
@@ -376,12 +361,9 @@ func (server *AuctionServer) synchronizeWithBackupServers() {
 			continue
 		}
 
-		// Update Lamport time for each received acknowledgment
-		server.updateAndIncrementLamport(ack.Lamport)
-
 		// Process the acknowledgment if it's valid
 		if ack.Valid {
-			// Do something with the ack
+			log.Printf("Server %v: Synchronized server on port %v\n", server.ID, backupServer.Conn.Target())
 		}
 	}
 
@@ -393,23 +375,18 @@ func (server *AuctionServer) synchronizeWithBackupServers() {
 
 // checkOtherLeaderExists checks if any of the backup servers is the leader.
 func (server *AuctionServer) checkOtherLeaderExists() bool {
-	// Update Lamport time before sending messages
-	server.updateAndIncrementLamport(server.lamportTime)
 	errorOccurred, otherLeaderExists := false, false
 
 	// Iterate over backup servers and check for a leader
 	for _, backupServer := range server.backupServers {
 		// Send IsLeader message to backup server
-		ack, err := backupServer.Server.IsLeader(context.Background(), &s.CheckLeader{Lamport: server.lamportTime})
+		ack, err := backupServer.Server.IsLeader(context.Background(), &s.Empty{})
 
 		// Check for errors in sending message
 		if err != nil {
 			errorOccurred = true
 			continue
 		}
-
-		// Update Lamport time for each received acknowledgment
-		server.updateAndIncrementLamport(ack.Lamport)
 
 		// If the acknowledgment indicates that the other server is the leader, set the flag
 		if ack.Valid {
@@ -423,15 +400,4 @@ func (server *AuctionServer) checkOtherLeaderExists() bool {
 	}
 
 	return otherLeaderExists
-}
-
-//##################################################
-//############## Internal functions ################
-//##################################################
-
-// updateAndIncrementLamport updates the Lamport time based on the received timestamp
-// and increments it by 1.
-func (server *AuctionServer) updateAndIncrementLamport(receivedTimestamp int32) int32 {
-	server.lamportTime = max(server.lamportTime, receivedTimestamp) + 1
-	return server.lamportTime
 }
