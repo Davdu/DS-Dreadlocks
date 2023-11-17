@@ -1,7 +1,7 @@
 package main
 
 import (
-	s "Auction/Server"
+	s "Auction/Service"
 	"context"
 	"fmt"
 	"google.golang.org/grpc"

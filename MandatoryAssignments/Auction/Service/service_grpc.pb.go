@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v4.25.0
-// source: server.proto
+// source: service.proto
 
 package __
 
@@ -39,7 +39,7 @@ func NewAuctionClient(cc grpc.ClientConnInterface) AuctionClient {
 
 func (c *auctionClient) Bid(ctx context.Context, in *Bid, opts ...grpc.CallOption) (*Ack, error) {
 	out := new(Ack)
-	err := c.cc.Invoke(ctx, "/Server.Auction/Bid", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Service.Auction/Bid", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func (c *auctionClient) Bid(ctx context.Context, in *Bid, opts ...grpc.CallOptio
 
 func (c *auctionClient) Result(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Sync, error) {
 	out := new(Sync)
-	err := c.cc.Invoke(ctx, "/Server.Auction/Result", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Service.Auction/Result", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (c *auctionClient) Result(ctx context.Context, in *Empty, opts ...grpc.Call
 
 func (c *auctionClient) Sync(ctx context.Context, in *Sync, opts ...grpc.CallOption) (*Ack, error) {
 	out := new(Ack)
-	err := c.cc.Invoke(ctx, "/Server.Auction/Sync", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Service.Auction/Sync", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (c *auctionClient) Sync(ctx context.Context, in *Sync, opts ...grpc.CallOpt
 
 func (c *auctionClient) IsLeader(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Ack, error) {
 	out := new(Ack)
-	err := c.cc.Invoke(ctx, "/Server.Auction/IsLeader", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Service.Auction/IsLeader", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +75,7 @@ func (c *auctionClient) IsLeader(ctx context.Context, in *Empty, opts ...grpc.Ca
 
 func (c *auctionClient) ReturnConnection(ctx context.Context, in *ReturnConnection, opts ...grpc.CallOption) (*Ack, error) {
 	out := new(Ack)
-	err := c.cc.Invoke(ctx, "/Server.Auction/ReturnConnection", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Service.Auction/ReturnConnection", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +136,7 @@ func _Auction_Bid_Handler(srv interface{}, ctx context.Context, dec func(interfa
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Server.Auction/Bid",
+		FullMethod: "/Service.Auction/Bid",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuctionServer).Bid(ctx, req.(*Bid))
@@ -154,7 +154,7 @@ func _Auction_Result_Handler(srv interface{}, ctx context.Context, dec func(inte
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Server.Auction/Result",
+		FullMethod: "/Service.Auction/Result",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuctionServer).Result(ctx, req.(*Empty))
@@ -172,7 +172,7 @@ func _Auction_Sync_Handler(srv interface{}, ctx context.Context, dec func(interf
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Server.Auction/Sync",
+		FullMethod: "/Service.Auction/Sync",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuctionServer).Sync(ctx, req.(*Sync))
@@ -190,7 +190,7 @@ func _Auction_IsLeader_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Server.Auction/IsLeader",
+		FullMethod: "/Service.Auction/IsLeader",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuctionServer).IsLeader(ctx, req.(*Empty))
@@ -208,7 +208,7 @@ func _Auction_ReturnConnection_Handler(srv interface{}, ctx context.Context, dec
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Server.Auction/ReturnConnection",
+		FullMethod: "/Service.Auction/ReturnConnection",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuctionServer).ReturnConnection(ctx, req.(*ReturnConnection))
@@ -220,7 +220,7 @@ func _Auction_ReturnConnection_Handler(srv interface{}, ctx context.Context, dec
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Auction_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "Server.Auction",
+	ServiceName: "Service.Auction",
 	HandlerType: (*AuctionServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -245,5 +245,5 @@ var Auction_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "server.proto",
+	Metadata: "service.proto",
 }

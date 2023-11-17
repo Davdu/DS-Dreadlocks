@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package Server;
+package Service;
 option go_package="./";
 
 service Auction {
