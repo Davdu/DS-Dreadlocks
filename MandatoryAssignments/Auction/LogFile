@@ -1,0 +1,17 @@
+2023/11/17 04:04:16 Server: 0 started on port localhost:50000
+2023/11/17 04:04:18 Server: 1 started on port localhost:50001
+2023/11/17 04:04:21 Server: 2 started on port localhost:50002
+2023/11/17 04:05:04 Client: Mads: connected to server on localhost:50000
+2023/11/17 04:05:08 Client: Casper: connected to server on localhost:50000
+2023/11/17 04:05:14 Server: 0 is now the leader
+2023/11/17 04:07:33 Server: 0 started on port localhost:50000
+2023/11/17 04:07:35 Server: 1 started on port localhost:50001
+2023/11/17 04:07:37 Server: 2 started on port localhost:50002
+2023/11/17 04:07:55 Client: Mads: connected to server on localhost:50000
+2023/11/17 04:08:05 Client: Mads: connected to server on localhost:50001
+2023/11/17 04:08:16 Client: Mads: connected to server on localhost:50002
+2023/11/17 04:08:25 Server: 0 started on port localhost:50000
+2023/11/17 04:08:28 Server: 1 started on port localhost:50001
+2023/11/17 04:08:52 Server: 2 is now the leader
+2023/11/17 04:09:06 Client: Mads: connected to server on localhost:50000
+2023/11/17 04:09:19 Server: 2 started on port localhost:50002

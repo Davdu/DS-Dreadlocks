@@ -5,7 +5,7 @@ option go_package="./";
 
 service Auction {
   rpc Bid(bid) returns (ack) {}
-  rpc Update(callForUpdate) returns (sync) {}
+  rpc Result(callForUpdate) returns (sync) {}
   rpc Sync(sync) returns (ack) {}
   rpc IsLeader(checkLeader) returns (ack) {}
   rpc ReturnConnection(returnConnection) returns (ack) {}
@@ -13,19 +13,19 @@ service Auction {
 
 message ack {
   bool valid = 1;
-  string comment = 2;
+  int32 returnCode = 2;
   int32 lamport = 3;
 }
 
 message bid {
-  int32 ID = 1;
+  string ID = 1;
   int32 amount = 2;
   int32 lamport = 3;
 }
 
 message sync {
   int32 highestBid = 1;
-  int32 highestBidderId = 2;
+  string highestBidder = 2;
   int32 timeRemaining = 3;
   bool sold = 4;
   int32 lamport = 5;
