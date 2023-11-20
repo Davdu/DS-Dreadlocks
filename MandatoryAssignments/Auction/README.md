@@ -4,8 +4,9 @@ Usage instructions:
 
         go run Server.go
 Repeat step 1 and 2 for each new server you want to start.
-For each new server, a crash can be handled. Any amount of servers can be started,
+For each new redundant server, a crash can be handled. Any amount of servers can be started,
 but it is recommended to start less than 10 servers to avoid any failures during discovery.
+If a crash occurs a new server can be started and will automatically join the network.
 
 
 
