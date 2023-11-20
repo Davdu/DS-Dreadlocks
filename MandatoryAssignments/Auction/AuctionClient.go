@@ -133,6 +133,10 @@ func (client *AuctionClient) findValidServerConn(lookForLeader bool) (connection
 		log.Printf("Client %v: No leader found. Retrying without looking for leader\n", client.ID)
 		connection = client.findValidServerConn(false)
 		return connection
+	} else if connection == nil {
+		// If no valid connection is found, log and return nil
+		log.Printf("Client %v: No valid server found\n", client.ID)
+		return nil
 	}
 
 	log.Printf("Client %v: Found valid server on port %v\n", client.ID, connection.Target())
