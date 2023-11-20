@@ -59,11 +59,11 @@ func (client *AuctionClient) connectToServer(lookForLeader bool) {
 	// Handle the case where no valid connection is obtained
 	if conn == nil {
 		fmt.Println("Could not connect to server. Restart client and try again.")
-		log.Fatalf("Client: %v: could not connect to server\n", client.ID)
+		log.Fatalf("Client %v: Could not connect to server\n", client.ID)
 	}
 
 	// Log and print the successful connection information
-	log.Printf("Client: %v: connected to server on %v\n", client.ID, conn.Target())
+	log.Printf("Client %v: Connected to server on %v\n", client.ID, conn.Target())
 	fmt.Printf("Connected to server on %v\n", conn.Target())
 
 	// Create a gRPC client based on the obtained connection
@@ -130,12 +130,12 @@ func (client *AuctionClient) findValidServerConn(lookForLeader bool) (connection
 
 	// If no leader is found and 'lookForLeader' is true, recursively call the function with 'lookForLeader' set to false
 	if connection == nil && lookForLeader {
-		log.Printf("Client: %v: no leader found. Retrying without looking for leader\n", client.ID)
+		log.Printf("Client %v: No leader found. Retrying without looking for leader\n", client.ID)
 		connection = client.findValidServerConn(false)
 		return connection
 	}
 
-	log.Printf("Client: %v: found valid server on port %v\n", client.ID, connection.Target())
+	log.Printf("Client %v: Found valid server on port %v\n", client.ID, connection.Target())
 
 	// Return the valid connection, if found
 	return connection
@@ -154,7 +154,7 @@ func (client *AuctionClient) Bid(amount int32) {
 		return
 	}
 
-	log.Printf("Client: %v: attempting to bid %d\n", client.ID, amount)
+	log.Printf("Client %v: Attempting to bid %d\n", client.ID, amount)
 	// Send a bid request to the server
 	ack, err := client.server.Bid(context.Background(), &s.Bid{
 		Amount: amount,
@@ -198,7 +198,7 @@ func (client *AuctionClient) Bid(amount int32) {
 		client.Update()
 	}
 
-	log.Printf("Client: %v: bid server response: %v\n", client.ID, response)
+	log.Printf("Client %v: Bid server response: %v\n", client.ID, response)
 
 }
 

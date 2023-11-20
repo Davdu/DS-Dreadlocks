@@ -249,8 +249,14 @@ func (server *AuctionServer) Sync(_ context.Context, incoming *s.Sync) (*s.Ack, 
 
 	log.Printf("Server %v: Synchronized\n", server.ID)
 
+	if server.sold == true {
+		log.Printf("Server %v: Terminating\n", server.ID)
+		os.Exit(0)
+	}
+
 	// Return a valid acknowledgment
 	return &s.Ack{Valid: true}, nil
+
 }
 
 // Bid handles the Bid RPC call, processing incoming bids and updating the server state accordingly.
@@ -265,7 +271,7 @@ func (server *AuctionServer) Bid(_ context.Context, incoming *s.Bid) (ack *s.Ack
 			return ack, nil                           // Don't handle bids
 		} else {
 			server.isLeader = true
-			log.Printf("Server: %v is now the leader\n", server.ID)
+			log.Printf("Server %v is now the leader\n", server.ID)
 		}
 	}
 
@@ -370,6 +376,11 @@ func (server *AuctionServer) synchronizeBackupServers() {
 	// If any errors occurred, remove unavailable servers
 	if errorOccurred {
 		removeUnavailableServers(server)
+	}
+
+	if server.sold == true {
+		log.Printf("Server %v: Terminating\n", server.ID)
+		os.Exit(0)
 	}
 }
 
