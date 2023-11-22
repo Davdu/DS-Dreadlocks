@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"net"
 	"os"
+	"slices"
 	"time"
 )
 
@@ -27,11 +28,12 @@ type AuctionServer struct {
 type backupServer struct {
 	Server s.AuctionClient
 	Conn   *grpc.ClientConn
+	ID     int32
 }
 
 func main() {
 	// Create a logger and open a log file
-	f, err := os.OpenFile("LogFile", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0664)
+	f, err := os.OpenFile("log.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0664)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}
@@ -177,7 +179,7 @@ func openConnection(id int32, server *AuctionServer) error {
 	otherServer := s.NewAuctionClient(conn)
 
 	// Append the connection to the backupServers slice
-	var bs = &backupServer{Server: otherServer, Conn: conn}
+	var bs = &backupServer{Server: otherServer, Conn: conn, ID: id}
 	server.backupServers = append(server.backupServers, bs)
 
 	fmt.Printf("Connected to server on port %v\n", conn.Target())
@@ -213,13 +215,16 @@ func requestReturnConnections(server *AuctionServer) {
 	// Iterate through backup servers and send a ReturnConnection request
 	for _, backupServer := range server.backupServers {
 		// Send a ReturnConnection request to the backup server
-		_, err := backupServer.Server.ReturnConnection(context.Background(), &s.ReturnConnection{ID: server.ID})
+		_, err := backupServer.Server.ReturnConnection(context.Background(), &s.ID{ID: server.ID})
 
 		// Continue to the next backup server in case of an error
 		if err != nil {
 			continue
 		}
 	}
+
+	// Call for election when all connections are established
+	server.callForElection(server.ID)
 }
 
 //##################################################
@@ -235,6 +240,7 @@ func (server *AuctionServer) Result(_ context.Context, _ *s.Empty) (*s.Sync, err
 		HighestBidder: server.highestBidder,
 		Sold:          server.sold,
 		TimeRemaining: server.timeRemaining,
+		IsLeader:      server.isLeader,
 	}, nil
 }
 
@@ -264,15 +270,8 @@ func (server *AuctionServer) Bid(_ context.Context, incoming *s.Bid) (ack *s.Ack
 
 	// Ensure that the server is the leader
 	if !server.isLeader {
-		// Check all other servers for an active leader
-		if server.checkOtherLeaderExists() {
-			// Another server is the leader, return acknowledgment with appropriate ReturnCode
-			ack = &s.Ack{Valid: false, ReturnCode: 1} // Another server is the leader
-			return ack, nil                           // Don't handle bids
-		} else {
-			server.isLeader = true
-			log.Printf("Server %v is now the leader\n", server.ID)
-		}
+		server.callForElection(server.ID)
+		return &s.Ack{Valid: false, ReturnCode: 1}, nil
 	}
 
 	log.Printf("Server %v: Received bid from %v for %v\n", server.ID, incoming.ID, incoming.Amount)
@@ -325,7 +324,7 @@ func (server *AuctionServer) IsLeader(_ context.Context, _ *s.Empty) (ack *s.Ack
 }
 
 // ReturnConnection handles the ReturnConnection RPC call, allowing other servers to reconnect.
-func (server *AuctionServer) ReturnConnection(_ context.Context, incoming *s.ReturnConnection) (ack *s.Ack, err error) {
+func (server *AuctionServer) ReturnConnection(_ context.Context, incoming *s.ID) (ack *s.Ack, err error) {
 
 	// Attempt to open a connection to the server with the given ID
 	err = openConnection(incoming.ID, server)
@@ -340,6 +339,28 @@ func (server *AuctionServer) ReturnConnection(_ context.Context, incoming *s.Ret
 	}
 
 	return ack, nil
+}
+
+// CallElection handles the CallElection RPC call, allowing other servers to call for an election.
+func (server *AuctionServer) CallElection(_ context.Context, incoming *s.ID) (ack *s.Ack, err error) {
+
+	// Synchronize with backup servers before calling for election
+	if server.isLeader {
+		server.synchronizeBackupServers()
+	}
+
+	server.isLeader = false
+
+	if incoming.ID == server.ID {
+		server.isLeader = true
+		log.Printf("Server %v: Elected as leader\n", server.ID)
+	} else if incoming.ID < server.ID {
+		server.callForElection(incoming.ID)
+	} else {
+		server.callForElection(server.ID)
+	}
+	return &s.Ack{Valid: true}, nil
+
 }
 
 //##################################################
@@ -384,31 +405,75 @@ func (server *AuctionServer) synchronizeBackupServers() {
 	}
 }
 
-// checkOtherLeaderExists checks if any of the backup servers is the leader.
-func (server *AuctionServer) checkOtherLeaderExists() bool {
-	errorOccurred, otherLeaderExists := false, false
+// callForElection initiates an election process among the backup servers.
+// It logs the server ID and the vote, checks if there are any backup servers available.
+// If there are no backup servers, it sets the server as the leader.
+// If there are backup servers, it finds the next server in the circle and calls for an election.
+// If an error occurs during the election call, it removes unavailable servers and calls for an election again.
+// Parameters:
+// vote: The ID of the server that this server votes for in the election.
+func (server *AuctionServer) callForElection(vote int32) {
 
-	// Iterate over backup servers and check for a leader
-	for _, backupServer := range server.backupServers {
-		// Send IsLeader message to backup server
-		ack, err := backupServer.Server.IsLeader(context.Background(), &s.Empty{})
+	log.Printf("Server %v: Calling for election, voting for %v\n", server.ID, vote)
 
-		// Check for errors in sending message
-		if err != nil {
-			errorOccurred = true
-			continue
-		}
-
-		// If the acknowledgment indicates that the other server is the leader, set the flag
-		if ack.Valid {
-			otherLeaderExists = true
-		}
+	if len(server.backupServers) == 0 {
+		server.isLeader = true
+		log.Printf("Server %v: No backup servers available. Election not needed\n", server.ID)
+		return
 	}
 
-	// If any errors occurred, remove unavailable servers
-	if errorOccurred {
+	nextServer := server.findNextServerInCircle()
+	if nextServer == nil {
+		server.isLeader = true
+		return
+	}
+
+	_, err := nextServer.Server.CallElection(context.Background(), &s.ID{ID: vote})
+	if err != nil {
 		removeUnavailableServers(server)
+		server.callForElection(vote)
+		return
 	}
 
-	return otherLeaderExists
+}
+
+// findNextServerInCircle finds the next server in the circle of backup servers.
+// It checks if there are any backup servers available.
+// If there are backup servers, it sorts the IDs of the backup servers and finds the next server in the circle.
+// The next server is the one with the ID greater than this server's ID.
+// If all backup servers have IDs less than this server's ID, it returns the server with the smallest ID.
+// Returns:
+// The next server in the circle. If there are no backup servers, it returns nil.
+func (server *AuctionServer) findNextServerInCircle() (next *backupServer) {
+
+	if len(server.backupServers) == 0 {
+		return nil
+	}
+
+	var backupServerIDs []int32
+	for _, backupServer := range server.backupServers {
+		backupServerIDs = append(backupServerIDs, backupServer.ID)
+	}
+
+	slices.Sort(backupServerIDs)
+
+	for i := 0; i < len(backupServerIDs); i++ {
+
+		if backupServerIDs[i] > server.ID {
+			for _, backupServer := range server.backupServers {
+				if backupServer.ID == backupServerIDs[i] {
+					return backupServer
+				}
+			}
+		}
+
+		if i == len(backupServerIDs)-1 {
+			for _, backupServer := range server.backupServers {
+				if backupServer.ID == backupServerIDs[0] {
+					return backupServer
+				}
+			}
+		}
+	}
+	return nil
 }

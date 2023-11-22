@@ -26,7 +26,9 @@ type AuctionClient interface {
 	Result(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Sync, error)
 	Sync(ctx context.Context, in *Sync, opts ...grpc.CallOption) (*Ack, error)
 	IsLeader(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Ack, error)
-	ReturnConnection(ctx context.Context, in *ReturnConnection, opts ...grpc.CallOption) (*Ack, error)
+	ReturnConnection(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Ack, error)
+	CallElection(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Ack, error)
+	GetID(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*ID, error)
 }
 
 type auctionClient struct {
@@ -73,9 +75,27 @@ func (c *auctionClient) IsLeader(ctx context.Context, in *Empty, opts ...grpc.Ca
 	return out, nil
 }
 
-func (c *auctionClient) ReturnConnection(ctx context.Context, in *ReturnConnection, opts ...grpc.CallOption) (*Ack, error) {
+func (c *auctionClient) ReturnConnection(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Ack, error) {
 	out := new(Ack)
 	err := c.cc.Invoke(ctx, "/Service.Auction/ReturnConnection", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *auctionClient) CallElection(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Ack, error) {
+	out := new(Ack)
+	err := c.cc.Invoke(ctx, "/Service.Auction/CallElection", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *auctionClient) GetID(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*ID, error) {
+	out := new(ID)
+	err := c.cc.Invoke(ctx, "/Service.Auction/GetID", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +110,9 @@ type AuctionServer interface {
 	Result(context.Context, *Empty) (*Sync, error)
 	Sync(context.Context, *Sync) (*Ack, error)
 	IsLeader(context.Context, *Empty) (*Ack, error)
-	ReturnConnection(context.Context, *ReturnConnection) (*Ack, error)
+	ReturnConnection(context.Context, *ID) (*Ack, error)
+	CallElection(context.Context, *ID) (*Ack, error)
+	GetID(context.Context, *Empty) (*ID, error)
 	mustEmbedUnimplementedAuctionServer()
 }
 
@@ -110,8 +132,14 @@ func (UnimplementedAuctionServer) Sync(context.Context, *Sync) (*Ack, error) {
 func (UnimplementedAuctionServer) IsLeader(context.Context, *Empty) (*Ack, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method IsLeader not implemented")
 }
-func (UnimplementedAuctionServer) ReturnConnection(context.Context, *ReturnConnection) (*Ack, error) {
+func (UnimplementedAuctionServer) ReturnConnection(context.Context, *ID) (*Ack, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReturnConnection not implemented")
+}
+func (UnimplementedAuctionServer) CallElection(context.Context, *ID) (*Ack, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CallElection not implemented")
+}
+func (UnimplementedAuctionServer) GetID(context.Context, *Empty) (*ID, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetID not implemented")
 }
 func (UnimplementedAuctionServer) mustEmbedUnimplementedAuctionServer() {}
 
@@ -199,7 +227,7 @@ func _Auction_IsLeader_Handler(srv interface{}, ctx context.Context, dec func(in
 }
 
 func _Auction_ReturnConnection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReturnConnection)
+	in := new(ID)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -211,7 +239,43 @@ func _Auction_ReturnConnection_Handler(srv interface{}, ctx context.Context, dec
 		FullMethod: "/Service.Auction/ReturnConnection",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuctionServer).ReturnConnection(ctx, req.(*ReturnConnection))
+		return srv.(AuctionServer).ReturnConnection(ctx, req.(*ID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Auction_CallElection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuctionServer).CallElection(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Service.Auction/CallElection",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuctionServer).CallElection(ctx, req.(*ID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Auction_GetID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuctionServer).GetID(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Service.Auction/GetID",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuctionServer).GetID(ctx, req.(*Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -242,6 +306,14 @@ var Auction_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ReturnConnection",
 			Handler:    _Auction_ReturnConnection_Handler,
+		},
+		{
+			MethodName: "CallElection",
+			Handler:    _Auction_CallElection_Handler,
+		},
+		{
+			MethodName: "GetID",
+			Handler:    _Auction_GetID_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

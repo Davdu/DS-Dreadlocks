@@ -8,7 +8,9 @@ service Auction {
   rpc Result(empty) returns (sync) {}
   rpc Sync(sync) returns (ack) {}
   rpc IsLeader(empty) returns (ack) {}
-  rpc ReturnConnection(returnConnection) returns (ack) {}
+  rpc ReturnConnection(ID) returns (ack) {}
+  rpc CallElection(ID) returns (ack) {}
+  rpc GetID(empty) returns (ID) {}
 }
 
 message ack {
@@ -26,11 +28,12 @@ message sync {
   string highestBidder = 2;
   int32 timeRemaining = 3;
   bool sold = 4;
+  bool isLeader = 5;
 }
 
 message empty{
 }
 
-message returnConnection {
+message ID {
   int32 ID = 1;
 }
