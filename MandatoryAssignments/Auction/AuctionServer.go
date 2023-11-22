@@ -9,7 +9,7 @@ import (
 	"math/rand"
 	"net"
 	"os"
-	"slices"
+	"sort"
 	"time"
 )
 
@@ -252,9 +252,6 @@ func (server *AuctionServer) Sync(_ context.Context, incoming *s.Sync) (*s.Ack, 
 	server.highestBidder = incoming.HighestBidder
 	server.sold = incoming.Sold
 	server.timeRemaining = incoming.TimeRemaining
-
-	log.Printf("Server %v: Synchronized\n", server.ID)
-
 	if server.sold == true {
 		log.Printf("Server %v: Terminating\n", server.ID)
 		os.Exit(0)
@@ -346,6 +343,7 @@ func (server *AuctionServer) CallElection(_ context.Context, incoming *s.ID) (ac
 
 	// Synchronize with backup servers before calling for election
 	if server.isLeader {
+		log.Printf("Server %v: Synchronizing before releasing leader status\n", server.ID)
 		server.synchronizeBackupServers()
 	}
 
@@ -413,28 +411,33 @@ func (server *AuctionServer) synchronizeBackupServers() {
 // Parameters:
 // vote: The ID of the server that this server votes for in the election.
 func (server *AuctionServer) callForElection(vote int32) {
-
+	// Log the initiation of the election process, including the server ID and the vote.
 	log.Printf("Server %v: Calling for election, voting for %v\n", server.ID, vote)
 
+	// Check if there are no backup servers available.
 	if len(server.backupServers) == 0 {
+		// If no backup servers are available, set the server as the leader.
 		server.isLeader = true
 		log.Printf("Server %v: No backup servers available. Election not needed\n", server.ID)
 		return
 	}
 
+	// Find the next server in the circle.
 	nextServer := server.findNextServerInCircle()
 	if nextServer == nil {
+		// If no next server is found, set the current server as the leader.
 		server.isLeader = true
 		return
 	}
 
+	// Call for an election on the next server in the circle and vote for the specified server ID.
 	_, err := nextServer.Server.CallElection(context.Background(), &s.ID{ID: vote})
 	if err != nil {
+		// If an error occurs during the election call, remove unavailable servers and retry the election.
 		removeUnavailableServers(server)
 		server.callForElection(vote)
 		return
 	}
-
 }
 
 // findNextServerInCircle finds the next server in the circle of backup servers.
@@ -444,36 +447,23 @@ func (server *AuctionServer) callForElection(vote int32) {
 // If all backup servers have IDs less than this server's ID, it returns the server with the smallest ID.
 // Returns:
 // The next server in the circle. If there are no backup servers, it returns nil.
-func (server *AuctionServer) findNextServerInCircle() (next *backupServer) {
-
+func (server *AuctionServer) findNextServerInCircle() *backupServer {
 	if len(server.backupServers) == 0 {
 		return nil
 	}
 
-	var backupServerIDs []int32
+	// Sort backup servers by ID
+	sort.Slice(server.backupServers, func(i, j int) bool {
+		return server.backupServers[i].ID < server.backupServers[j].ID
+	})
+
+	// Find the next server in the circle
 	for _, backupServer := range server.backupServers {
-		backupServerIDs = append(backupServerIDs, backupServer.ID)
-	}
-
-	slices.Sort(backupServerIDs)
-
-	for i := 0; i < len(backupServerIDs); i++ {
-
-		if backupServerIDs[i] > server.ID {
-			for _, backupServer := range server.backupServers {
-				if backupServer.ID == backupServerIDs[i] {
-					return backupServer
-				}
-			}
-		}
-
-		if i == len(backupServerIDs)-1 {
-			for _, backupServer := range server.backupServers {
-				if backupServer.ID == backupServerIDs[0] {
-					return backupServer
-				}
-			}
+		if backupServer.ID > server.ID {
+			return backupServer
 		}
 	}
-	return nil
+
+	// If no next server is found, return the server with the smallest ID
+	return server.backupServers[0]
 }
