@@ -10,6 +10,7 @@ import (
 	"net"
 	"os"
 	"sort"
+	"sync"
 	"time"
 )
 
@@ -23,6 +24,7 @@ type AuctionServer struct {
 	port          string
 	timeRemaining int32
 	backupServers []*backupServer
+	mutex         sync.Mutex
 }
 
 type backupServer struct {
@@ -143,7 +145,6 @@ func establishConnectionsAndReservePort(server *AuctionServer) {
 	for i := range server.backupServers {
 		log.Printf("Server %v: Connected to server on port %v\n", server.ID, server.backupServers[i].Conn.Target())
 	}
-
 }
 
 // canConnectToPort checks if a connection can be established to the specified port.
@@ -233,7 +234,6 @@ func requestReturnConnections(server *AuctionServer) {
 
 // Result handles the CallForUpdate RPC call, providing the current state of the auction server to the client.
 func (server *AuctionServer) Result(_ context.Context, _ *s.Empty) (*s.Sync, error) {
-
 	// Return a Sync message with the current state of the server
 	return &s.Sync{
 		HighestBid:    server.highestBid,
@@ -246,7 +246,6 @@ func (server *AuctionServer) Result(_ context.Context, _ *s.Empty) (*s.Sync, err
 
 // Sync handles the Sync RPC call, synchronizing the state of the auction server with the incoming Sync message.
 func (server *AuctionServer) Sync(_ context.Context, incoming *s.Sync) (*s.Ack, error) {
-
 	// Update server state with the incoming Sync message
 	server.highestBid = incoming.HighestBid
 	server.highestBidder = incoming.HighestBidder
@@ -273,16 +272,15 @@ func (server *AuctionServer) Bid(_ context.Context, incoming *s.Bid) (ack *s.Ack
 
 	log.Printf("Server %v: Received bid from %v for %v\n", server.ID, incoming.ID, incoming.Amount)
 
+	server.mutex.Lock()
+
 	// Handle bid
 	if server.highestBid >= incoming.Amount {
 		ack = &s.Ack{Valid: false, ReturnCode: 2} // Bid too low. Increase bid above the highest bid.
-
 	} else if server.highestBidder == incoming.ID {
 		ack = &s.Ack{Valid: false, ReturnCode: 3} // You are already the highest bidder
-
 	} else if server.sold {
 		ack = &s.Ack{Valid: false, ReturnCode: 4} // Item has already been sold
-
 	} else {
 		// Update server state with the incoming bid
 		server.highestBid = incoming.Amount
@@ -303,6 +301,8 @@ func (server *AuctionServer) Bid(_ context.Context, incoming *s.Bid) (ack *s.Ack
 	if ack.ReturnCode != 0 {
 		log.Printf("Server %v: Bid unsuccessful\n", server.ID)
 	}
+
+	server.mutex.Unlock()
 
 	return ack, nil
 }
@@ -361,10 +361,9 @@ func (server *AuctionServer) CallElection(_ context.Context, incoming *s.ID) (ac
 
 }
 
-//##################################################
-//############## RPC callers #######################
-//##################################################
-
+// ##################################################
+// ############## RPC callers #######################
+// ##################################################
 // synchronizeBackupServers sends synchronization messages to backup servers.
 func (server *AuctionServer) synchronizeBackupServers() {
 
