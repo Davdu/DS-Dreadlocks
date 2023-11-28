@@ -352,6 +352,7 @@ func (server *AuctionServer) CallElection(_ context.Context, incoming *s.ID) (ac
 	if incoming.ID == server.ID {
 		server.isLeader = true
 		log.Printf("Server %v: Elected as leader\n", server.ID)
+		log.Printf("Server %v: Highest bid is %v from %v", server.ID, server.highestBid, server.highestBidder)
 	} else if incoming.ID < server.ID {
 		server.callForElection(incoming.ID)
 	} else {

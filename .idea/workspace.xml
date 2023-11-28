@@ -5,8 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cab107e2-a770-4bb0-828e-7bef6d7ff151" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/Auction/AuctionServer.go" beforeDir="false" afterPath="$PROJECT_DIR$/MandatoryAssignments/Auction/AuctionServer.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MandatoryAssignments/Auction/log.txt" beforeDir="false" afterPath="$PROJECT_DIR$/MandatoryAssignments/Auction/log.txt" afterDir="false" />
     </list>
     <list id="69e78ce6-687e-4cff-bb58-9c0552039e1b" name="Changes by Administrator" comment="" />
     <option name="SHOW_DIALOG" value="false" />
@@ -21,7 +22,7 @@
       </list>
     </option>
   </component>
-  <component name="GOROOT" url="file://$PROJECT_DIR$/../../../../../../Program Files/Go" />
+  <component name="GOROOT" url="file://$PROJECT_DIR$/../../../../../Program Files/Go" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
