@@ -1,0 +1,70 @@
+2023/11/22 20:50:34 Server 0: Now serving requests on localhost:50000
+2023/11/22 20:50:39 Server 0: Calling for election, voting for 0
+2023/11/22 20:50:39 Server 0: No backup servers available. Election not needed
+2023/11/22 20:50:41 Server 1: Connected to server on port localhost:50000
+2023/11/22 20:50:41 Server 1: Now serving requests on localhost:50001
+2023/11/22 20:50:46 Server 0: Connected to server on port localhost:50001
+2023/11/22 20:50:46 Server 1: Calling for election, voting for 1
+2023/11/22 20:50:46 Server 0: Synchronizing before releasing leader status
+2023/11/22 20:50:46 Server 0: Synchronized server on port localhost:50001
+2023/11/22 20:50:46 Server 0: Calling for election, voting for 0
+2023/11/22 20:50:46 Server 1: Calling for election, voting for 0
+2023/11/22 20:50:46 Server 0: Elected as leader
+2023/11/22 20:50:58 Server 2: Connected to server on port localhost:50000
+2023/11/22 20:50:58 Server 2: Connected to server on port localhost:50001
+2023/11/22 20:50:58 Server 2: Now serving requests on localhost:50002
+2023/11/22 20:51:03 Server 0: Connected to server on port localhost:50002
+2023/11/22 20:51:03 Server 1: Connected to server on port localhost:50002
+2023/11/22 20:51:03 Server 2: Calling for election, voting for 2
+2023/11/22 20:51:03 Server 0: Synchronizing before releasing leader status
+2023/11/22 20:51:03 Server 0: Synchronized server on port localhost:50001
+2023/11/22 20:51:03 Server 0: Synchronized server on port localhost:50002
+2023/11/22 20:51:03 Server 0: Calling for election, voting for 0
+2023/11/22 20:51:03 Server 1: Calling for election, voting for 0
+2023/11/22 20:51:03 Server 2: Calling for election, voting for 0
+2023/11/22 20:51:03 Server 0: Elected as leader
+2023/11/22 20:54:15 Client Mads: Found valid server on port localhost:50000
+2023/11/22 20:54:15 Client Mads: Connected to server on localhost:50000
+2023/11/22 20:54:36 Client Casper: Found valid server on port localhost:50000
+2023/11/22 20:54:36 Client Casper: Connected to server on localhost:50000
+2023/11/22 20:56:58 Client Mads: Attempting to bid 100
+2023/11/22 20:56:58 Server 0: Received bid from Mads for 100
+2023/11/22 20:56:58 Server 0: Highest bid is now 100 from Mads
+2023/11/22 20:56:58 Server 0: Synchronized server on port localhost:50001
+2023/11/22 20:56:58 Server 0: Synchronized server on port localhost:50002
+2023/11/22 20:56:58 Client Mads: Bid server response: Bid successful
+2023/11/22 20:58:13 Client Casper: Attempting to bid 200
+2023/11/22 20:58:13 Server 0: Received bid from Casper for 200
+2023/11/22 20:58:13 Server 0: Highest bid is now 200 from Casper
+2023/11/22 20:58:13 Server 0: Synchronized server on port localhost:50001
+2023/11/22 20:58:13 Server 0: Synchronized server on port localhost:50002
+2023/11/22 20:58:13 Client Casper: Bid server response: Bid successful
+2023/11/22 20:58:31 Client Mads: Lost connection to server. Attempting to reconnect to server in 5 seconds...
+2023/11/22 20:58:31 Client Casper: Lost connection to server. Attempting to reconnect to server in 5 seconds...
+2023/11/22 20:58:36 Client Mads: No leader found. Forcing election on first server found
+2023/11/22 20:58:36 Server 1: Calling for election, voting for 1
+2023/11/22 20:58:36 Server 2: Calling for election, voting for 1
+2023/11/22 20:58:36 Server 2: Connection to server localhost:50000 lost
+2023/11/22 20:58:36 Server 2: Calling for election, voting for 1
+2023/11/22 20:58:36 Server 1: Elected as leader
+2023/11/22 20:58:36 Client Casper: Found valid server on port localhost:50001
+2023/11/22 20:58:36 Client Casper: Connected to server on localhost:50001
+2023/11/22 20:58:41 Client Mads: Found valid server on port localhost:50001
+2023/11/22 20:58:41 Client Mads: Connected to server on localhost:50001
+2023/11/22 21:00:12 Server 0: Connected to server on port localhost:50001
+2023/11/22 21:00:12 Server 0: Connected to server on port localhost:50002
+2023/11/22 21:00:12 Server 0: Now serving requests on localhost:50000
+2023/11/22 21:00:17 Server 1: Connected to server on port localhost:50000
+2023/11/22 21:00:17 Server 2: Connected to server on port localhost:50000
+2023/11/22 21:00:17 Server 0: Calling for election, voting for 0
+2023/11/22 21:00:17 Server 1: Synchronizing before releasing leader status
+2023/11/22 21:00:17 Server 1: Synchronized server on port localhost:50000
+2023/11/22 21:00:17 Server 1: Synchronized server on port localhost:50002
+2023/11/22 21:00:17 Server 1: Synchronized server on port localhost:50000
+2023/11/22 21:00:17 Server 1: Calling for election, voting for 0
+2023/11/22 21:00:17 Server 2: Calling for election, voting for 0
+2023/11/22 21:00:17 Server 0: Elected as leader
+2023/11/22 21:00:21 Client Mads: Found valid server on port localhost:50000
+2023/11/22 21:00:21 Client Mads: Connected to server on localhost:50000
+2023/11/22 21:00:21 Client Casper: Found valid server on port localhost:50000
+2023/11/22 21:00:21 Client Casper: Connected to server on localhost:50000
